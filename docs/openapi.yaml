@@ -1,0 +1,270 @@
+openapi: 3.0.3
+info:
+  title: Orange Order API
+  version: 0.1.0
+  description: |
+    单机下单系统的对外接口。调用方只访问网关。
+    成功创建与幂等重放都返回 201。degraded 为 true 时订单仍然有效。
+    内部端口、复制和故障转移不属于本契约。
+servers:
+  - url: http://127.0.0.1:8080
+    description: 本机网关
+paths:
+  /v1/orders:
+    post:
+      operationId: createOrder
+      summary: 创建订单或重放已有订单
+      parameters:
+        - $ref: "#/components/parameters/CallerId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/RequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrder"
+            example:
+              sku: gear-1
+              qty: 1
+              external_ref: cart-88
+              fulfill_url: http://127.0.0.1:9000/hooks/orange-fulfill
+      responses:
+        "201":
+          description: 已接受，或钥匙对应的订单已存在且正文相同
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "503":
+          $ref: "#/components/responses/Error"
+        "504":
+          $ref: "#/components/responses/Error"
+    get:
+      operationId: getOrderByIdempotencyKey
+      summary: 用幂等键找回订单
+      parameters:
+        - $ref: "#/components/parameters/CallerId"
+        - $ref: "#/components/parameters/RequestId"
+        - name: idempotency_key
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+      responses:
+        "200":
+          description: 找到订单的当前快照
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+  /v1/orders/{order_id}:
+    get:
+      operationId: getOrder
+      summary: 按订单号读取当前快照
+      parameters:
+        - $ref: "#/components/parameters/CallerId"
+        - $ref: "#/components/parameters/RequestId"
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 当前快照，履约状态可能已经前进
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          $ref: "#/components/responses/Error"
+  /health:
+    get:
+      operationId: health
+      summary: 存活探针
+      responses:
+        "200":
+          description: 进程能处理 HTTP
+  /ready:
+    get:
+      operationId: ready
+      summary: 就绪探针
+      responses:
+        "200":
+          description: 网关至少有一个订单副本可写
+        "503":
+          description: 没有可写副本，或主存储正在切换
+components:
+  parameters:
+    CallerId:
+      name: X-Caller-Id
+      in: header
+      required: true
+      schema:
+        type: string
+        pattern: "^[a-z0-9-]{1,32}$"
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 128
+    RequestId:
+      name: X-Request-Id
+      in: header
+      required: false
+      schema:
+        type: string
+  headers:
+    RequestId:
+      schema:
+        type: string
+      required: true
+    RetryAfter:
+      schema:
+        type: integer
+        minimum: 0
+      description: 秒
+      required: true
+  responses:
+    Error:
+      description: 请求失败
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    RateLimited:
+      description: 令牌用尽、在途已满，或待处理任务达到上限
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/RequestId"
+        Retry-After:
+          $ref: "#/components/headers/RetryAfter"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+  schemas:
+    CreateOrder:
+      type: object
+      additionalProperties: true
+      required: [sku, qty]
+      properties:
+        sku:
+          type: string
+          minLength: 1
+          maxLength: 64
+        qty:
+          type: integer
+          minimum: 1
+          maximum: 100
+        external_ref:
+          type: string
+          maxLength: 128
+        fulfill_url:
+          type: string
+          description: 仅允许 http://127.0.0.1 的地址，且不能包含用户信息
+    Fulfillment:
+      type: object
+      required: [status, attempts, last_error]
+      properties:
+        status:
+          type: string
+          enum: [pending, inflight, done, dead]
+        attempts:
+          type: integer
+          minimum: 0
+        last_error:
+          type: string
+          nullable: true
+    Order:
+      type: object
+      required:
+        - order_id
+        - caller_id
+        - external_ref
+        - sku
+        - qty
+        - state
+        - recommendation
+        - degraded
+        - fulfillment
+        - epoch
+        - request_id
+      properties:
+        order_id:
+          type: string
+        caller_id:
+          type: string
+        external_ref:
+          type: string
+          nullable: true
+        sku:
+          type: string
+        qty:
+          type: integer
+        state:
+          type: string
+          enum: [accepted, fulfilled, fulfillment_failed]
+        recommendation:
+          type: string
+          nullable: true
+        degraded:
+          type: boolean
+        fulfillment:
+          $ref: "#/components/schemas/Fulfillment"
+        epoch:
+          type: integer
+          minimum: 1
+        request_id:
+          type: string
+    ErrorBody:
+      type: object
+      required: [code, message, request_id]
+      properties:
+        code:
+          type: string
+          enum:
+            - invalid_argument
+            - not_found
+            - idempotency_mismatch
+            - rate_limited
+            - unavailable
+            - deadline_exceeded
+        message:
+          type: string
+        request_id:
+          type: string
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          $ref: "#/components/schemas/ErrorBody"
