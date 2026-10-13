@@ -1,38 +1,39 @@
-# Orange 下单系统
+# Orange Order System
 
-Orange 是一个跑在单机上的多进程下单系统，用来学习分布式里的容错和伸缩，并给另一个项目提供稳定的下单入口。
+Orange is a single-machine, multi-process order system for learning resilience and elasticity in distributed systems, and for giving another project a stable place to submit orders.
 
-当前状态：**设计 0.1 已定，代码尚未开始。** 调用方拥有商品、价格和购物车；本系统负责接单、保存、降级、异步履约和主从切换。
+Current status: **design 0.1 is implemented.** The caller owns the catalog, prices, and cart. This system accepts the order, stores it, degrades when recommendation is unavailable, fulfills asynchronously, and fails over between a leader and a follower.
 
-## 文档
+## Documents
 
-| 文档 | 内容 |
+| Document | Contents |
 | --- | --- |
-| [需求与变更记录](docs/requirements-history.md) | 原始弹性表、评审结论，以及之后的需求变更 |
-| [系统概述](docs/overview.md) | 背景、目标、边界、术语 |
-| [架构设计](docs/architecture.md) | 上下文、进程图、时序、状态机 |
-| [技术方案](docs/technical-design.md) | 选型、写入规则、复制、伸缩、参数、验收 |
-| [接口说明](docs/api.md) | 对外语义与进程间接口 |
-| [OpenAPI](docs/openapi.yaml) | 机器可读的对外契约 |
-| [数据模型](docs/data-model.md) | 表、日志、状态 |
-| [集成指南](docs/integration.md) | 另一个项目如何接入 |
-| [ADR 0001 单主](docs/adr/0001-single-leader.md) | 异步复制，用 epoch 隔离旧主 |
-| [ADR 0002 任务表](docs/adr/0002-job-table.md) | 用任务表充当队列 |
-| [ADR 0003 见证人](docs/adr/0003-supervisor-witness.md) | 只有监督者能提升主存储 |
-| [ADR 0004 技术栈](docs/adr/0004-stdlib-sqlite.md) | Python 标准库与 sqlite |
-| [ADR 0005 集成方式](docs/adr/0005-sync-poll-integration.md) | 同步下单、轮询履约、可选回调 |
+| [中文版 README](README.zh.md) | 本页的中文说明 |
+| [Requirements history](docs/requirements-history.md) | The original elasticity table, the review, and later requirement changes |
+| [Overview](docs/overview.md) | Background, goals, boundaries, and terms |
+| [Architecture](docs/architecture.md) | Context, process diagram, sequences, and state machines |
+| [Technical design](docs/technical-design.md) | Choices, write rules, replication, scaling, parameters, and acceptance tests |
+| [API](docs/api.md) | Public semantics and inter-process interfaces |
+| [OpenAPI](docs/openapi.yaml) | Machine-readable public contract |
+| [Data model](docs/data-model.md) | Tables, the replication log, and states |
+| [Integration guide](docs/integration.md) | How another project calls Orange |
+| [ADR 0001 Single leader](docs/adr/0001-single-leader.md) | Asynchronous replication, with an epoch that fences the old leader |
+| [ADR 0002 Job table](docs/adr/0002-job-table.md) | The job table is the queue |
+| [ADR 0003 Witness](docs/adr/0003-supervisor-witness.md) | Only the supervisor may promote a store |
+| [ADR 0004 Stack](docs/adr/0004-stdlib-sqlite.md) | The Python standard library and sqlite |
+| [ADR 0005 Integration](docs/adr/0005-sync-poll-integration.md) | Synchronous submit, poll for fulfillment, optional callback |
 
-集成方读 [集成指南](docs/integration.md) 和 [OpenAPI](docs/openapi.yaml) 即可开始对接。实现时以 [技术方案](docs/technical-design.md) 里的参数表为准。
+Integrators start with the [integration guide](docs/integration.md) and [OpenAPI](docs/openapi.yaml). Implementation follows the parameter table in the [technical design](docs/technical-design.md).
 
-## 进程一览
+## Processes
 
-调用方只访问网关 `127.0.0.1:8080`。其余端口是系统内部的。
+Callers use only the gateway at `127.0.0.1:8080`. The other ports are internal.
 
-| 进程 | 端口 | 角色 |
+| Process | Port | Role |
 | --- | --- | --- |
-| 网关 | 8080 | 限流、截止时间、分发到就绪副本 |
-| 订单 A / B | 8101 / 8102 | 无状态接单 |
-| 推荐 | 8200 | 可失败的旁路 |
-| 主存储 / 从存储 | 启动时 8301 / 8302 | 单主写入，从节点异步复制；切换后角色对调，端口不变 |
-| 监督者 | 8090 | 探活、拉起、公布主节点、加减工人 |
-| 工人 | 8401 起 | 1 到 3 个；端口只提供探针和指标，履约时访问主存储 |
+| Gateway | 8080 | Rate limit, deadline, and dispatch to a ready replica |
+| Order A / B | 8101 / 8102 | Stateless order acceptance |
+| Recommender | 8200 | A side path that may fail |
+| Leader / follower store | 8301 / 8302 at startup | Single-leader writes; the follower replicates asynchronously. After failover the roles swap and the ports stay |
+| Supervisor | 8090 | Probe, restart, publish the current leader, and scale workers |
+| Workers | 8401 and up | 1 to 3. The port serves only probes and metrics; fulfillment talks to the leader store |
