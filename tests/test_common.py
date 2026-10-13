@@ -1,11 +1,15 @@
 """不启动进程也能核对的规则。"""
 
+import threading
 import unittest
 
 from orange.common import (
     CircuitBreaker,
     TokenBucket,
     canonical_body,
+    http_request,
+    serve,
+    text_response,
     valid_fulfill_url,
     validate_order_body,
 )
@@ -45,6 +49,23 @@ class CommonTest(unittest.TestCase):
             self.assertTrue(breaker.allow())
             breaker.record(False)
         self.assertFalse(breaker.allow())
+
+    def test_serve_answers_hello_world(self) -> None:
+        def hello(method: str, path: str, headers: dict[str, str], raw: bytes):
+            return text_response(200, "hello world")
+
+        server = serve(0, hello)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            port = server.server_address[1]
+            status, _, body = http_request("GET", f"http://127.0.0.1:{port}/hello")
+            self.assertEqual(status, 200)
+            self.assertEqual(body, b"hello world")
+        finally:
+            server.shutdown()
+            server.server_close()
+            thread.join(timeout=2)
 
 
 if __name__ == "__main__":
