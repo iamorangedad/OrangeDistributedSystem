@@ -1,0 +1,6 @@
+{
+  "delay_ms": {"store": 0, "recommender": 0},
+  "pause_replication": false,
+  "drop_heartbeat": {"store-a": false, "store-b": false},
+  "exit_after_requests": {"order-1": 0, "order-2": 0}
+}
