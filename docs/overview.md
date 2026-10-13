@@ -76,3 +76,4 @@ Orange 负责：
 - 要看系统长什么样： [架构设计](architecture.md)
 - 要实现： [技术方案](technical-design.md) → [数据模型](data-model.md) → [接口说明](api.md)
 - 要问为什么这样取舍： [决策记录](adr/)
+- 要看需求从哪来、后来改了什么： [需求与变更记录](requirements-history.md)
