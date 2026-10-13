@@ -8,6 +8,7 @@ Orange 是一个跑在单机上的多进程下单系统，用来学习分布式�
 
 | 文档 | 内容 |
 | --- | --- |
+| [需求与变更记录](docs/requirements-history.md) | 原始弹性表、评审结论，以及之后的需求变更 |
 | [系统概述](docs/overview.md) | 背景、目标、边界、术语 |
 | [架构设计](docs/architecture.md) | 上下文、进程图、时序、状态机 |
 | [技术方案](docs/technical-design.md) | 选型、写入规则、复制、伸缩、参数、验收 |
