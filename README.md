@@ -22,6 +22,7 @@ Current status: **design 0.1 is implemented.** The caller owns the catalog, pric
 | [ADR 0003 Witness](docs/adr/0003-supervisor-witness.md) | Only the supervisor may promote a store |
 | [ADR 0004 Stack](docs/adr/0004-stdlib-sqlite.md) | The Python standard library and sqlite |
 | [ADR 0005 Integration](docs/adr/0005-sync-poll-integration.md) | Synchronous submit, poll for fulfillment, optional callback |
+| [Interview walkthrough](docs/interview.md) | How to use this system to answer “design a distributed system” |
 
 Integrators start with the [integration guide](docs/integration.md) and [OpenAPI](docs/openapi.yaml). Implementation follows the parameter table in the [technical design](docs/technical-design.md).
 

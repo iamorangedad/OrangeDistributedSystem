@@ -21,6 +21,7 @@ Orange 是一个跑在单机上的多进程下单系统，用来学习分布式�
 | [ADR 0003 见证人](docs/adr/0003-supervisor-witness.md) | 只有监督者能提升主存储 |
 | [ADR 0004 技术栈](docs/adr/0004-stdlib-sqlite.md) | Python 标准库与 sqlite |
 | [ADR 0005 集成方式](docs/adr/0005-sync-poll-integration.md) | 同步下单、轮询履约、可选回调 |
+| [面试讲解](docs/interview.md) | 用本系统回答「如何设计一个分布式系统」 |
 
 集成方读 [集成指南](docs/integration.md) 和 [OpenAPI](docs/openapi.yaml) 即可开始对接。实现时以 [技术方案](docs/technical-design.md) 里的参数表为准。
 
