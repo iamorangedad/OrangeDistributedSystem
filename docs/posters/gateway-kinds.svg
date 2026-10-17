@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 1220" width="880" height="1220" role="img">
+  <title>Nginx、Envoy 和 API 网关</title>
+  <defs>
+    <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#e4e0d6" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 1.4 L 9 5 L 0 8.6 z" fill="#222222"/>
+    </marker>
+  </defs>
+  <rect width="880" height="1220" fill="#f6f3ec"/>
+  <rect width="880" height="1220" fill="url(#grid)"/>
+  <rect x="28" y="28" width="46" height="56" rx="6" fill="#2f6fd6"/>
+  <rect x="36" y="36" width="30" height="36" rx="2" fill="#ffffff"/>
+  <text x="51" y="60" font-size="18" fill="#2f6fd6" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">O</text>
+  <rect x="86" y="32" width="92" height="26" rx="6" fill="#1c1c1c"/>
+  <text x="132" y="50" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">网关</text>
+  <text x="188" y="50" font-size="13" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">通用概念</text>
+  <text x="40" y="122" font-size="34" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">Nginx、Envoy 和 API 网关</text>
+  <rect x="28" y="142" width="824" height="48" rx="8" fill="#ffffff" stroke="#2f6fd6" stroke-width="1.6"/>
+  <rect x="28" y="142" width="8" height="48" fill="#2f6fd6"/>
+  <text x="52" y="172" font-size="16" fill="#1c1c1c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">都是调用方与业务进程之间的那一层，重点各不相同。</text>
+  <text x="40" y="220" font-size="28" fill="#e07a2f" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">01</text>
+<text x="108" y="220" font-size="24" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">三种常见摆法</text>
+<text x="108" y="246" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">位置相同，配置的重点不同。</text>
+<rect x="40" y="290" width="260" height="230" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<text x="170" y="332" font-size="22" fill="#1c1c1c" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">Nginx</text>
+<text x="170" y="360" font-size="14" fill="#c4550a" text-anchor="middle" font-weight="600" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">网站和反向代理</text>
+<text x="60" y="408" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">收 HTTPS，按路径转发。</text>
+<text x="60" y="440" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">也能直接提供静态文件。</text>
+<text x="60" y="472" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">适合门口和大量连接。</text>
+<rect x="316" y="290" width="260" height="230" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<text x="446" y="332" font-size="22" fill="#1c1c1c" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">Envoy</text>
+<text x="446" y="360" font-size="14" fill="#c4550a" text-anchor="middle" font-weight="600" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">服务之间的代理</text>
+<text x="336" y="408" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">放在门口，或放在每个服务旁。</text>
+<text x="336" y="440" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">超时、重试、熔断在配置里。</text>
+<text x="336" y="472" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">常作为服务网格的数据面。</text>
+<rect x="592" y="290" width="260" height="230" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<text x="722" y="332" font-size="22" fill="#1c1c1c" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">API 网关</text>
+<text x="722" y="360" font-size="14" fill="#c4550a" text-anchor="middle" font-weight="600" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">对着外部调用方</text>
+<text x="612" y="408" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">转发前核对身份和配额。</text>
+<text x="612" y="440" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">对外保持一份稳定契约。</text>
+<text x="612" y="472" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">Kong、云厂商网关属于这一类。</text>
+<text x="40" y="560" font-size="28" fill="#e07a2f" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">02</text>
+<text x="108" y="560" font-size="24" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">听到名字时先问位置</text>
+<text x="108" y="586" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">同一个词会指不同摆法。</text>
+<rect x="40" y="630" width="800" height="64" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<text x="60" y="670" font-size="16" fill="#c4550a" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">门口</text>
+<text x="180" y="670" font-size="15" fill="#1c1c1c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">Nginx 或入口 Envoy。外部流量从这里进来。</text>
+<rect x="40" y="708" width="800" height="64" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<text x="60" y="748" font-size="16" fill="#c4550a" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">服务旁边</text>
+<text x="180" y="748" font-size="15" fill="#1c1c1c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">边车 Envoy。本服务的进出流量都经过它。</text>
+<rect x="40" y="786" width="800" height="64" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<text x="60" y="826" font-size="16" fill="#c4550a" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">对外契约</text>
+<text x="180" y="826" font-size="15" fill="#1c1c1c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">API 网关。调用方依赖的是这份契约，不是内部进程。</text>
+<text x="40" y="890" font-size="28" fill="#e07a2f" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">03</text>
+<text x="108" y="890" font-size="24" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">Orange 的网关放在哪</text>
+<text x="108" y="916" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">它是 API 网关这一类里的最小例子。</text>
+<rect x="40" y="960" width="800" height="88" rx="8" fill="#fff6f0" stroke="#c4550a" stroke-width="2"/>
+<text x="60" y="996" font-size="16" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">一个对外地址 :8080</text>
+<text x="60" y="1024" font-size="15" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">限流、在途上限、截止时间，再轮询两个订单副本。</text>
+  <rect x="28" y="1128" width="824" height="64" rx="10" fill="#e07a2f"/>
+  <text x="440" y="1166" font-size="16" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">先问它站在哪，再问它这次请求做了哪几件事</text>
+</svg>
