@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 1040" width="880" height="1040" role="img">
+  <title>进门时它做什么</title>
+  <defs>
+    <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#e4e0d6" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 1.4 L 9 5 L 0 8.6 z" fill="#222222"/>
+    </marker>
+  </defs>
+  <rect width="880" height="1040" fill="#f6f3ec"/>
+  <rect width="880" height="1040" fill="url(#grid)"/>
+  <rect x="28" y="28" width="46" height="56" rx="6" fill="#2f6fd6"/>
+  <rect x="36" y="36" width="30" height="36" rx="2" fill="#ffffff"/>
+  <text x="51" y="60" font-size="18" fill="#2f6fd6" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">O</text>
+  <rect x="86" y="32" width="92" height="26" rx="6" fill="#1c1c1c"/>
+  <text x="132" y="50" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">网关</text>
+  <text x="188" y="50" font-size="13" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">通用概念</text>
+  <text x="40" y="122" font-size="34" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">进门时它做什么</text>
+  <rect x="28" y="142" width="824" height="48" rx="8" fill="#ffffff" stroke="#2f6fd6" stroke-width="1.6"/>
+  <rect x="28" y="142" width="8" height="48" fill="#2f6fd6"/>
+  <text x="52" y="172" font-size="16" fill="#1c1c1c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">先处理这次请求，再把它交给后面的服务。</text>
+  <text x="40" y="220" font-size="28" fill="#e07a2f" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">01</text>
+<text x="108" y="220" font-size="24" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">进门时常见的六件事</text>
+<text x="108" y="246" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">一个具体产品往往只做其中几项，名字仍叫网关。</text>
+<rect x="40" y="290" width="400" height="104" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<circle cx="76" cy="330" r="16" fill="#e07a2f"/>
+<text x="76" y="336" font-size="14" fill="#fff" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">1</text>
+<text x="104" y="336" font-size="18" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">路由</text>
+<text x="64" y="370" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">按路径、主机或头部，把请求交给对应服务。</text>
+<rect x="460" y="290" width="400" height="104" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<circle cx="496" cy="330" r="16" fill="#e07a2f"/>
+<text x="496" y="336" font-size="14" fill="#fff" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">2</text>
+<text x="524" y="336" font-size="18" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">挑选副本</text>
+<text x="484" y="370" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">同一服务有多份时，选一个健康的。</text>
+<rect x="40" y="410" width="400" height="104" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<circle cx="76" cy="450" r="16" fill="#e07a2f"/>
+<text x="76" y="456" font-size="14" fill="#fff" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">3</text>
+<text x="104" y="456" font-size="18" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">加密与身份</text>
+<text x="64" y="490" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">在门口结束 TLS，并核对调用方是谁。</text>
+<rect x="460" y="410" width="400" height="104" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<circle cx="496" cy="450" r="16" fill="#e07a2f"/>
+<text x="496" y="456" font-size="14" fill="#fff" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">4</text>
+<text x="524" y="456" font-size="18" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">限流</text>
+<text x="484" y="490" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">请求太密时直接拒绝，保护后面的服务。</text>
+<rect x="40" y="530" width="400" height="104" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<circle cx="76" cy="570" r="16" fill="#e07a2f"/>
+<text x="76" y="576" font-size="14" fill="#fff" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">5</text>
+<text x="104" y="576" font-size="18" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">截止时间</text>
+<text x="64" y="610" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">这次请求多久必须结束，避免慢调用占住门口。</text>
+<rect x="460" y="530" width="400" height="104" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<circle cx="496" cy="570" r="16" fill="#e07a2f"/>
+<text x="496" y="576" font-size="14" fill="#fff" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">6</text>
+<text x="524" y="576" font-size="18" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">留下编号</text>
+<text x="484" y="610" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">给请求一个编号，日志里能从门口追到服务。</text>
+<text x="40" y="680" font-size="28" fill="#e07a2f" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">02</text>
+<text x="108" y="680" font-size="24" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">Orange 只做了其中四件</text>
+<text x="108" y="706" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">它是学习用的最小门口，不是 Nginx 或 Envoy 的替代。</text>
+<rect x="40" y="750" width="194" height="110" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<text x="137" y="792" font-size="18" fill="#c4550a" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">限流</text>
+<text x="56" y="826" font-size="13" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">容量 30，每秒补 10</text>
+<rect x="246" y="750" width="194" height="110" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<text x="343" y="792" font-size="18" fill="#c4550a" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">积压</text>
+<text x="262" y="826" font-size="13" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">达到 50 就拒绝新单</text>
+<rect x="452" y="750" width="194" height="110" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<text x="549" y="792" font-size="18" fill="#c4550a" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">在途</text>
+<text x="468" y="826" font-size="13" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">同时下单不超过 8</text>
+<rect x="658" y="750" width="194" height="110" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<text x="755" y="792" font-size="18" fill="#c4550a" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">转发</text>
+<text x="674" y="826" font-size="13" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">轮询两个就绪副本</text>
+<text x="40" y="900" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">身份认证和 TLS 不在这一版里。能访问 127.0.0.1:8080 就可以下单。</text>
+  <rect x="28" y="948" width="824" height="64" rx="10" fill="#e07a2f"/>
+  <text x="440" y="986" font-size="16" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">拒绝发生在门口。已经进门的请求继续由后面的服务处理</text>
+</svg>
