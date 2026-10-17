@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 1680" width="880" height="1680" role="img">
+  <title>记住这四项取舍</title>
+  <defs>
+    <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M 28 0 L 0 0 0 28" fill="none" stroke="#e4e0d6" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 1.4 L 9 5 L 0 8.6 z" fill="#222222"/>
+    </marker>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M 0 1.4 L 9 5 L 0 8.6 z" fill="#777777"/>
+    </marker>
+  </defs>
+  <rect width="880" height="1680" fill="#f6f3ec"/>
+  <rect width="880" height="1680" fill="url(#grid)"/>
+  <rect x="28" y="28" width="46" height="56" rx="6" fill="#2f6fd6"/>
+  <rect x="36" y="36" width="30" height="36" rx="2" fill="#ffffff"/>
+  <text x="51" y="60" font-size="18" fill="#2f6fd6" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">O</text>
+  <rect x="86" y="32" width="92" height="26" rx="6" fill="#1c1c1c"/>
+  <text x="132" y="50" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">设计</text>
+  <text x="188" y="50" font-size="13" fill="#5c5c5c" text-anchor="start" font-weight="500" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">Orange 学习海报</text>
+  <text x="40" y="122" font-size="36" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">记住这四项取舍</text>
+  <rect x="28" y="142" width="824" height="48" rx="8" fill="#ffffff" stroke="#2f6fd6" stroke-width="1.6"/>
+  <rect x="28" y="142" width="8" height="48" fill="#2f6fd6"/>
+  <text x="52" y="172" font-size="16" fill="#1c1c1c" text-anchor="start" font-weight="500" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">容错和伸缩分开。订单副本固定两个，随积压增减的是工人。</text>
+  <text x="40" y="230" font-size="28" fill="#e07a2f" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">01</text>
+<text x="108" y="230" font-size="24" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">四个决定行为的设计</text>
+<text x="108" y="256" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">改这些规则之前，先改技术方案里的参数表。</text>
+<rect x="40" y="300" width="396" height="194" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<circle cx="76" cy="340" r="18" fill="#e07a2f"/>
+<text x="76" y="346" font-size="16" fill="#fff" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">A</text>
+<text x="106" y="336" font-size="20" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">幂等</text>
+<text x="106" y="360" font-size="13" fill="#c4550a" text-anchor="start" font-weight="600" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">同一把钥匙</text>
+<text x="60" y="404" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">调用方和钥匙相同、正文相同：</text>
+<text x="60" y="428" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">仍是 201，不建第二笔，返回当前快照。</text>
+<text x="60" y="452" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">正文不同则 409。超时后用原钥匙重试。</text>
+<rect x="452" y="300" width="396" height="194" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<circle cx="488" cy="340" r="18" fill="#e07a2f"/>
+<text x="488" y="346" font-size="16" fill="#fff" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">B</text>
+<text x="518" y="336" font-size="20" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">两个订单</text>
+<text x="518" y="360" font-size="13" fill="#c4550a" text-anchor="start" font-weight="600" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">只为容错</text>
+<text x="472" y="404" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">A 和 B 跑同一份逻辑，记录在主存储。</text>
+<text x="472" y="428" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">停掉一个，另一个继续接单。</text>
+<text x="472" y="452" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">个数固定为 2，不随负载增加。</text>
+<rect x="40" y="510" width="396" height="194" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<circle cx="76" cy="550" r="18" fill="#e07a2f"/>
+<text x="76" y="556" font-size="16" fill="#fff" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">C</text>
+<text x="106" y="546" font-size="20" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">推荐可失败</text>
+<text x="106" y="570" font-size="13" fill="#c4550a" text-anchor="start" font-weight="600" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">80ms 旁路</text>
+<text x="60" y="614" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">与写存储同时开始。超时、断连或熔断时，</text>
+<text x="60" y="638" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">订单仍是 201，degraded 为 true。</text>
+<text x="60" y="662" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">两个副本的熔断器互不共享。</text>
+<rect x="452" y="510" width="396" height="194" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<circle cx="488" cy="550" r="18" fill="#e07a2f"/>
+<text x="488" y="556" font-size="16" fill="#fff" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">D</text>
+<text x="518" y="546" font-size="20" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">单主写入</text>
+<text x="518" y="570" font-size="13" fill="#c4550a" text-anchor="start" font-weight="600" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">epoch 隔离</text>
+<text x="472" y="614" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">只有当前代际的主存储能确认写入。</text>
+<text x="472" y="638" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">监督者是唯一能提升从存储的人。</text>
+<text x="472" y="662" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">旧主看到更大的 epoch 后让出写入。</text>
+<line x1="64" y1="740" x2="64" y2="768" stroke="#e07a2f" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="40" y="780" font-size="28" fill="#e07a2f" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">02</text>
+<text x="108" y="780" font-size="24" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">写在代码里的数</text>
+<text x="108" y="806" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">这些数集中在 orange/common.py。</text>
+<rect x="40" y="820" width="94" height="78" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.2"/>
+<text x="87" y="852" font-size="16" fill="#c4550a" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">30</text>
+<text x="87" y="876" font-size="12" fill="#5c5c5c" text-anchor="middle" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">令牌容量</text>
+<rect x="142" y="820" width="94" height="78" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.2"/>
+<text x="189" y="852" font-size="16" fill="#c4550a" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">10/秒</text>
+<text x="189" y="876" font-size="12" fill="#5c5c5c" text-anchor="middle" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">令牌补充</text>
+<rect x="244" y="820" width="94" height="78" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.2"/>
+<text x="291" y="852" font-size="16" fill="#c4550a" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">8</text>
+<text x="291" y="876" font-size="12" fill="#5c5c5c" text-anchor="middle" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">在途上限</text>
+<rect x="346" y="820" width="94" height="78" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.2"/>
+<text x="393" y="852" font-size="16" fill="#c4550a" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">50</text>
+<text x="393" y="876" font-size="12" fill="#5c5c5c" text-anchor="middle" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">积压拒单</text>
+<rect x="448" y="820" width="94" height="78" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.2"/>
+<text x="495" y="852" font-size="16" fill="#c4550a" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">800ms</text>
+<text x="495" y="876" font-size="12" fill="#5c5c5c" text-anchor="middle" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">下单截止</text>
+<rect x="550" y="820" width="94" height="78" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.2"/>
+<text x="597" y="852" font-size="16" fill="#c4550a" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">80ms</text>
+<text x="597" y="876" font-size="12" fill="#5c5c5c" text-anchor="middle" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">推荐预算</text>
+<rect x="652" y="820" width="94" height="78" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.2"/>
+<text x="699" y="852" font-size="16" fill="#c4550a" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">15秒</text>
+<text x="699" y="876" font-size="12" fill="#5c5c5c" text-anchor="middle" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">任务可见</text>
+<rect x="754" y="820" width="94" height="78" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.2"/>
+<text x="801" y="852" font-size="16" fill="#c4550a" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">5次</text>
+<text x="801" y="876" font-size="12" fill="#5c5c5c" text-anchor="middle" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">履约尝试</text>
+<line x1="64" y1="930" x2="64" y2="958" stroke="#e07a2f" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="40" y="970" font-size="28" fill="#e07a2f" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">03</text>
+<text x="108" y="970" font-size="24" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">接单之后任务怎么走</text>
+<text x="108" y="996" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">任务表就是队列。工人向当前主存储领取。</text>
+<circle cx="96" cy="1048" r="36" fill="#ffffff" stroke="#e07a2f" stroke-width="2"/>
+<text x="96" y="1053" font-size="13" fill="#1c1c1c" text-anchor="middle" font-weight="650" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">接单</text>
+<line x1="136" y1="1048" x2="168" y2="1048" stroke="#222222" stroke-width="1.6" marker-end="url(#arrow)"/>
+<circle cx="264" cy="1048" r="36" fill="#ffffff" stroke="#e07a2f" stroke-width="2"/>
+<text x="264" y="1053" font-size="13" fill="#1c1c1c" text-anchor="middle" font-weight="650" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">fsync</text>
+<line x1="304" y1="1048" x2="336" y2="1048" stroke="#222222" stroke-width="1.6" marker-end="url(#arrow)"/>
+<circle cx="432" cy="1048" r="36" fill="#ffffff" stroke="#e07a2f" stroke-width="2"/>
+<text x="432" y="1053" font-size="13" fill="#1c1c1c" text-anchor="middle" font-weight="650" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">领取</text>
+<line x1="472" y1="1048" x2="504" y2="1048" stroke="#222222" stroke-width="1.6" marker-end="url(#arrow)"/>
+<circle cx="600" cy="1048" r="36" fill="#ffffff" stroke="#e07a2f" stroke-width="2"/>
+<text x="600" y="1053" font-size="13" fill="#1c1c1c" text-anchor="middle" font-weight="650" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">履约</text>
+<line x1="640" y1="1048" x2="672" y2="1048" stroke="#222222" stroke-width="1.6" marker-end="url(#arrow)"/>
+<circle cx="768" cy="1048" r="36" fill="#ffffff" stroke="#e07a2f" stroke-width="2"/>
+<text x="768" y="1053" font-size="13" fill="#1c1c1c" text-anchor="middle" font-weight="650" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">完成或死信</text>
+<text x="40" y="1124" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">没有 fulfill_url 时，工人在本地把任务标成完成。</text>
+<text x="40" y="1148" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">有地址时，向 127.0.0.1 发送 POST。2xx 或 409 算成功。</text>
+<text x="40" y="1172" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">其他结果稍后重试，最多 5 次，然后订单变为 fulfillment_failed。</text>
+<text x="40" y="1196" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">工人领走后退出，15 秒内任务回到待领取，履约只生效一次。</text>
+<line x1="64" y1="1230" x2="64" y2="1258" stroke="#e07a2f" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="40" y="1270" font-size="28" fill="#e07a2f" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">04</text>
+<text x="108" y="1270" font-size="24" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">积压与切换</text>
+<text x="108" y="1296" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">伸缩看的是待处理任务，不看 CPU。</text>
+<rect x="40" y="1336" width="800" height="50" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<text x="58" y="1368" font-size="15" fill="#c4550a" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">加工人</text>
+<text x="140" y="1368" font-size="14" fill="#1c1c1c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">待处理大于 10，持续 5 秒，且距上次伸缩超过 15 秒，直到 3 个。</text>
+<rect x="40" y="1394" width="800" height="50" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<text x="58" y="1426" font-size="15" fill="#c4550a" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">收工人</text>
+<text x="140" y="1426" font-size="14" fill="#1c1c1c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">待处理为 0，持续 20 秒，且工人多于 1，收回到 1 个。</text>
+<rect x="40" y="1452" width="800" height="50" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<text x="58" y="1484" font-size="15" fill="#c4550a" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">拒新单</text>
+<text x="140" y="1484" font-size="14" fill="#1c1c1c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">待处理达到 50，网关对新下单返回 429。已接受的订单继续履约。</text>
+<rect x="40" y="1510" width="800" height="50" rx="8" fill="#ffffff" stroke="#222222" stroke-width="1.4"/>
+<text x="58" y="1542" font-size="15" fill="#c4550a" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">切换</text>
+<text x="140" y="1542" font-size="14" fill="#1c1c1c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">主存储心跳丢失约 1 秒，且从存储仍在心跳，监督者提升从存储。网关最多暂停 2 秒。</text>
+  <rect x="28" y="1588" width="824" height="64" rx="10" fill="#e07a2f"/>
+  <text x="440" y="1626" font-size="16" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">复制前崩溃时，已返回 201 但尚未复制的订单可能不在新主上</text>
+</svg>
