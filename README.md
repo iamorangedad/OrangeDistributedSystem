@@ -45,8 +45,8 @@ The same design is implemented three times, so the repository can be read as a l
 
 | | Python | Rust | Java |
 | --- | --- | --- | --- |
-| Code | `orange/` | `rust/src/` | `java/src/orange/` |
-| Start | `python3 -m orange.supervisor --root .` | `cargo run --manifest-path rust/Cargo.toml -- --root .` | `java/build.sh --root .` |
-| Tests | `python3 -m unittest tests.test_common tests.test_acceptance` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` | `java/build.sh test` |
+| Code | `python/src/orange/` | `rust/src/` | `java/src/orange/` |
+| Start | `python/run.sh --root .` | `cargo run --manifest-path rust/Cargo.toml -- --root .` | `java/build.sh --root .` |
+| Tests | `python/run.sh test` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` | `java/build.sh test` |
 
-All three stacks listen on the same ports. Run one at a time. The file-by-file maps are in [rust/README.md](rust/README.md) and [java/README.md](java/README.md).
+All three stacks listen on the same ports. Run one at a time. The file-by-file maps are in [python/README.md](python/README.md), [rust/README.md](rust/README.md), and [java/README.md](java/README.md).

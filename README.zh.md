@@ -44,8 +44,8 @@ Orange 是一个跑在单机上的多进程下单系统，用来学习分布式�
 
 | | Python | Rust | Java |
 | --- | --- | --- | --- |
-| 代码 | `orange/` | `rust/src/` | `java/src/orange/` |
-| 启动 | `python3 -m orange.supervisor --root .` | `cargo run --manifest-path rust/Cargo.toml -- --root .` | `java/build.sh --root .` |
-| 测试 | `python3 -m unittest tests.test_common tests.test_acceptance` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` | `java/build.sh test` |
+| 代码 | `python/src/orange/` | `rust/src/` | `java/src/orange/` |
+| 启动 | `python/run.sh --root .` | `cargo run --manifest-path rust/Cargo.toml -- --root .` | `java/build.sh --root .` |
+| 测试 | `python/run.sh test` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` | `java/build.sh test` |
 
-三套实现占用同一组端口，一次只跑一套。文件对照表在 [rust/README.md](rust/README.md) 和 [java/README.md](java/README.md)。
+三套实现占用同一组端口，一次只跑一套。文件对照表在 [python/README.md](python/README.md)、[rust/README.md](rust/README.md) 和 [java/README.md](java/README.md)。

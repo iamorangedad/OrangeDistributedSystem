@@ -99,6 +99,9 @@ class Cluster:
     def start(self) -> None:
         env = os.environ.copy()
         env["ORANGE_ROOT"] = self.root
+        src = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
+        current = env.get("PYTHONPATH")
+        env["PYTHONPATH"] = src if not current else src + os.pathsep + current
         self.proc = subprocess.Popen(
             [sys.executable, "-m", "orange.supervisor", "--root", self.root],
             env=env,

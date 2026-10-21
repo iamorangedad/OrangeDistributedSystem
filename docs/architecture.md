@@ -176,7 +176,7 @@ stateDiagram-v2
 
 ```text
 OrangeDistributedSystem/
-  orange/                 未来的进程代码
+  python/src/orange/      Python 进程代码
   runtime/faults.json     故障开关
   runtime/data/leader.sqlite
   runtime/data/follower.sqlite
