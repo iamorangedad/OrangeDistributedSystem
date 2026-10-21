@@ -39,14 +39,14 @@ Callers use only the gateway at `127.0.0.1:8080`. The other ports are internal.
 | Supervisor | 8090 | Probe, restart, publish the current leader, and scale workers |
 | Workers | 8401 and up | 1 to 3. The port serves only probes and metrics; fulfillment talks to the leader store |
 
-## Three languages
+## Four languages
 
-The same design is implemented three times, so the repository can be read as a language comparison. Python is the original. Rust and Java repeat the same processes, ports, errors, and acceptance tests.
+The same design is implemented four times, so the repository can be read as a language comparison. Python is the original. Rust, Java, and C++ repeat the same processes, ports, errors, and acceptance tests.
 
-| | Python | Rust | Java |
-| --- | --- | --- | --- |
-| Code | `python/src/orange/` | `rust/src/` | `java/src/orange/` |
-| Start | `python/run.sh --root .` | `cargo run --manifest-path rust/Cargo.toml -- --root .` | `java/build.sh --root .` |
-| Tests | `python/run.sh test` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` | `java/build.sh test` |
+| | Python | Rust | Java | C++ |
+| --- | --- | --- | --- | --- |
+| Code | `python/src/orange/` | `rust/src/` | `java/src/orange/` | `cpp/src/` |
+| Start | `python/run.sh --root .` | `cargo run --manifest-path rust/Cargo.toml -- --root .` | `java/build.sh --root .` | `cpp/build.sh --root .` |
+| Tests | `python/run.sh test` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` | `java/build.sh test` | `cpp/build.sh test` |
 
-All three stacks listen on the same ports. Run one at a time. The file-by-file maps are in [python/README.md](python/README.md), [rust/README.md](rust/README.md), and [java/README.md](java/README.md).
+All four stacks listen on the same ports. Run one at a time. The file-by-file maps are in [python/README.md](python/README.md), [rust/README.md](rust/README.md), [java/README.md](java/README.md), and [cpp/README.md](cpp/README.md).

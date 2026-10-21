@@ -5,3 +5,5 @@ runtime/logs/
 rust/target/
 java/build/
 java/lib/
+cpp/build/
+cpp/third_party/
