@@ -9,22 +9,22 @@ Current status: **design 0.1 is implemented.** The caller owns the catalog, pric
 | Document | Contents |
 | --- | --- |
 | [中文版 README](README.zh.md) | 本页的中文说明 |
-| [Requirements history](docs/requirements-history.md) | The original elasticity table, the review, and later requirement changes |
-| [Overview](docs/overview.md) | Background, goals, boundaries, and terms |
-| [Architecture](docs/architecture.md) | Context, process diagram, sequences, and state machines |
-| [Technical design](docs/technical-design.md) | Choices, write rules, replication, scaling, parameters, and acceptance tests |
-| [API](docs/api.md) | Public semantics and inter-process interfaces |
-| [OpenAPI](docs/openapi.yaml) | Machine-readable public contract |
-| [Data model](docs/data-model.md) | Tables, the replication log, and states |
-| [Integration guide](docs/integration.md) | How another project calls Orange |
-| [ADR 0001 Single leader](docs/adr/0001-single-leader.md) | Asynchronous replication, with an epoch that fences the old leader |
-| [ADR 0002 Job table](docs/adr/0002-job-table.md) | The job table is the queue |
-| [ADR 0003 Witness](docs/adr/0003-supervisor-witness.md) | Only the supervisor may promote a store |
-| [ADR 0004 Stack](docs/adr/0004-stdlib-sqlite.md) | The Python standard library and sqlite |
-| [ADR 0005 Integration](docs/adr/0005-sync-poll-integration.md) | Synchronous submit, poll for fulfillment, optional callback |
-| [Interview walkthrough](docs/interview.md) | How to use this system to answer “design a distributed system” |
+| [Requirements history](docs/en/requirements-history.md) | The original elasticity table, the review, and later requirement changes |
+| [Overview](docs/en/overview.md) | Background, goals, boundaries, and terms |
+| [Architecture](docs/en/architecture.md) | Context, process diagram, sequences, and state machines |
+| [Technical design](docs/en/technical-design.md) | Choices, write rules, replication, scaling, parameters, and acceptance tests |
+| [API](docs/en/api.md) | Public semantics and inter-process interfaces |
+| [OpenAPI](docs/en/openapi.yaml) | Machine-readable public contract, in English |
+| [Data model](docs/en/data-model.md) | Tables, the replication log, and states |
+| [Integration guide](docs/en/integration.md) | How another project calls Orange |
+| [ADR 0001 Single leader](docs/en/adr/0001-single-leader.md) | Asynchronous replication, with an epoch that fences the old leader |
+| [ADR 0002 Job table](docs/en/adr/0002-job-table.md) | The job table is the queue |
+| [ADR 0003 Witness](docs/en/adr/0003-supervisor-witness.md) | Only the supervisor may promote a store |
+| [ADR 0004 Stack](docs/en/adr/0004-stdlib-sqlite.md) | Five implementations, each with its own sqlite |
+| [ADR 0005 Integration](docs/en/adr/0005-sync-poll-integration.md) | Synchronous submit, poll for fulfillment, optional callback |
+| [Interview walkthrough](docs/en/interview.md) | How to use this system to answer “design a distributed system” |
 
-Integrators start with the [integration guide](docs/integration.md) and [OpenAPI](docs/openapi.yaml). Implementation follows the parameter table in the [technical design](docs/technical-design.md).
+The Chinese originals stay in `docs/` without the `en` segment. Integrators start with the [integration guide](docs/en/integration.md) and [OpenAPI](docs/en/openapi.yaml). Implementation follows the parameter table in the [technical design](docs/en/technical-design.md).
 
 ## Processes
 
@@ -51,4 +51,4 @@ The same design is implemented five times, so the repository can be read as a la
 | C++ | `cpp/src/` | `cpp/build.sh --root .` | `cpp/build.sh test` |
 | Go | `go/` | `go/run.sh --root .` | `go/run.sh test` |
 
-All five stacks listen on the same ports. Run one at a time. The file-by-file maps are in [python/README.md](python/README.md), [rust/README.md](rust/README.md), [java/README.md](java/README.md), [cpp/README.md](cpp/README.md), and [go/README.md](go/README.md).
+All five stacks listen on the same ports. Run one at a time. The file-by-file maps are in [python/README.en.md](python/README.en.md), [rust/README.en.md](rust/README.en.md), [java/README.en.md](java/README.en.md), [cpp/README.en.md](cpp/README.en.md), and [go/README.en.md](go/README.en.md). Chinese copies sit beside them as `README.md`.

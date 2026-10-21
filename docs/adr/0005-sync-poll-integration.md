@@ -1,5 +1,7 @@
 # ADR 0005：集成使用同步下单和轮询，履约地址可选
 
+英文版：[English](../en/adr/0005-sync-poll-integration.md)。
+
 - 状态：已接受
 - 日期：2026-10-10
 

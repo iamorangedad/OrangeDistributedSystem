@@ -1,5 +1,7 @@
 # 需求与变更记录
 
+英文版：[Requirements history](en/requirements-history.md)。
+
 | 项 | 值 |
 | --- | --- |
 | 状态 | 历史记录。现行规格以设计文档为准，不以本文的早期方案为准 |
@@ -108,7 +110,7 @@ Elastic System Review 最初只放在对话旁的画布里，没有进入仓库�
 
 实现顺序定为七段：单进程幂等，网关与两个副本，推荐与熔断，任务表与死信，主从与 epoch，按积压加减工人，故障文件与四个计数。第一版不包含跨地域多活、多主、CQRS、Raft/Paxos、Kafka、Kubernetes、Envoy、CDN、OpenTelemetry Collector、托管混沌平台，以及按 CPU 或延迟自动扩缩。Raft 留到单主转移能演示之后再作为单独练习。
 
-实现约定：Python 3 标准库和 sqlite3，进程由监督者拉起。
+当天的实现约定是：进程由监督者拉起，每个存储节点一个 sqlite 文件。语言当时只写了 Python。同一份契约后来又有 Rust、Java、C++ 和 Go，见文末 CHG-3。
 
 ## 变更 CHG-2：设计文档相对评审画布
 
@@ -143,3 +145,14 @@ Elastic System Review 最初只放在对话旁的画布里，没有进入仓库�
 - 单主 fsync 后确认，从存储可以落后。监督者是唯一见证人。
 - 存活探针和就绪探针分开。故障注入只在本机的 `runtime/faults.json`。
 - 第一版仍然不包含 CDN、Envoy、Kafka、Kubernetes、多主、CQRS、Raft、跨地域多活和托管混沌平台。
+
+## 变更 CHG-3：五种语言实现同一份契约
+
+日期：2026-10-21。触发原因：同一份下单设计要能对照着读不同语言，而不是只保留最初的 Python。
+
+这次变更不改端口、错误、日志、参数和 AC-1 到 AC-12。对外契约仍然不携带某种语言的类型。
+
+| 编号 | 相对 CHG-2 | 变更后的需求 | 落在哪 |
+| --- | --- | --- | --- |
+| R3-1 | 实现约定只写 Python 标准库 | 五种实现并排：Python、Rust、Java、C++、Go。一次只跑一种，因为端口相同 | [ADR 0004](adr/0004-stdlib-sqlite.md)、各语言 README |
+| R3-2 | 技术方案把运行时写成 Python 标准库 | 语言差异留在 ADR 0004 和各语言 README。技术方案只保留与语言无关的参数和行为 | [技术方案](technical-design.md) |

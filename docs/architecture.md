@@ -1,8 +1,10 @@
 # 架构设计
 
+英文版：[Architecture](en/architecture.md)。
+
 | 项 | 值 |
 | --- | --- |
-| 状态 | 已接受的设计，尚未实现 |
+| 状态 | 设计 0.1 已实现 |
 | 版本 | 0.1 |
 | 日期 | 2026-10-10 |
 
@@ -176,10 +178,9 @@ stateDiagram-v2
 
 ```text
 OrangeDistributedSystem/
-  python/src/orange/      Python 进程代码
-  runtime/faults.json     故障开关
-  runtime/data/leader.sqlite
-  runtime/data/follower.sqlite
+  python/  rust/  java/  cpp/  go/   五种实现，一次只跑一种
+  runtime/faults.json                 故障开关
+  runtime/data/                       两个 sqlite 文件，由存储进程自己创建
 ```
 
 监督者按固定名单启动网关、两个订单进程、推荐、主存储、从存储和一个工人。工人增加时占用 8402、8403，只提供探针和指标。主存储或从存储的 sqlite 文件由该进程自己创建。复制走应用层日志，不复制数据库文件。
