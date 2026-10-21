@@ -1,10 +1,10 @@
 # Orange 的 Java 实现
 
-这一份和 `python/src/orange/` 里的 Python、`rust/` 里的 Rust 做同一件事：单机上的多进程下单。对外端口、错误码、日志事件和 AC-1 到 AC-12 都对齐技术方案。Python 和 Rust 都保留，三边可以对照着读。
+这一份和 `python/src/orange/` 里的 Python、`rust/` 里的 Rust、`cpp/` 里的 C++ 做同一件事：单机上的多进程下单。对外端口、错误码、日志事件和 AC-1 到 AC-12 都对齐技术方案。另外三种语言都保留，四边可以对照着读。
 
 Java 这边不用 Web 框架。HTTP 用 JDK 自带的 `com.sun.net.httpserver`，JSON 是手写的 `Json`，每个存储进程仍是一把锁。JDK 没有 sqlite，所以只多一个依赖：`sqlite-jdbc`。构建脚本会在缺少 jar 时下载它，jar 不进版本库。
 
-一次只启动一种语言。三套都绑定 8080、8090、8101 这些端口。
+一次只启动一种语言。四套都绑定 8080、8090、8101 这些端口。
 
 ## 怎么跑
 
