@@ -43,10 +43,12 @@ Callers use only the gateway at `127.0.0.1:8080`. The other ports are internal.
 
 The same design is implemented five times, so the repository can be read as a language comparison. Python is the original. Rust, Java, C++, and Go repeat the same processes, ports, errors, and acceptance tests.
 
-| | Python | Rust | Java | C++ | Go |
-| --- | --- | --- | --- | --- | --- |
-| Code | `python/src/orange/` | `rust/src/` | `java/src/orange/` | `cpp/src/` | `go/` |
-| Start | `python/run.sh --root .` | `cargo run --manifest-path rust/Cargo.toml -- --root .` | `java/build.sh --root .` | `cpp/build.sh --root .` | `go/run.sh --root .` |
-| Tests | `python/run.sh test` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` | `java/build.sh test` | `cpp/build.sh test` | `go/run.sh test` |
+| | Code | Start | Tests |
+| --- | --- | --- | --- |
+| Python | `python/src/orange/` | `python/run.sh --root .` | `python/run.sh test` |
+| Rust | `rust/src/` | `cargo run --manifest-path rust/Cargo.toml -- --root .` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` |
+| Java | `java/src/orange/` | `java/build.sh --root .` | `java/build.sh test` |
+| C++ | `cpp/src/` | `cpp/build.sh --root .` | `cpp/build.sh test` |
+| Go | `go/` | `go/run.sh --root .` | `go/run.sh test` |
 
 All five stacks listen on the same ports. Run one at a time. The file-by-file maps are in [python/README.md](python/README.md), [rust/README.md](rust/README.md), [java/README.md](java/README.md), [cpp/README.md](cpp/README.md), and [go/README.md](go/README.md).
