@@ -38,14 +38,14 @@ Orange 是一个跑在单机上的多进程下单系统，用来学习分布式�
 | 监督者 | 8090 | 探活、拉起、公布主节点、加减工人 |
 | 工人 | 8401 起 | 1 到 3 个；端口只提供探针和指标，履约时访问主存储 |
 
-## 四种语言
+## 五种语言
 
-同一份设计写了四遍，用来对照着学语言。Python 是最初的实现。Rust、Java 和 C++ 重复同样的进程、端口、错误和验收。
+同一份设计写了五遍，用来对照着学语言。Python 是最初的实现。Rust、Java、C++ 和 Go 重复同样的进程、端口、错误和验收。
 
-| | Python | Rust | Java | C++ |
-| --- | --- | --- | --- | --- |
-| 代码 | `python/src/orange/` | `rust/src/` | `java/src/orange/` | `cpp/src/` |
-| 启动 | `python/run.sh --root .` | `cargo run --manifest-path rust/Cargo.toml -- --root .` | `java/build.sh --root .` | `cpp/build.sh --root .` |
-| 测试 | `python/run.sh test` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` | `java/build.sh test` | `cpp/build.sh test` |
+| | Python | Rust | Java | C++ | Go |
+| --- | --- | --- | --- | --- | --- |
+| 代码 | `python/src/orange/` | `rust/src/` | `java/src/orange/` | `cpp/src/` | `go/` |
+| 启动 | `python/run.sh --root .` | `cargo run --manifest-path rust/Cargo.toml -- --root .` | `java/build.sh --root .` | `cpp/build.sh --root .` | `go/run.sh --root .` |
+| 测试 | `python/run.sh test` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` | `java/build.sh test` | `cpp/build.sh test` | `go/run.sh test` |
 
-四套实现占用同一组端口，一次只跑一套。文件对照表在 [python/README.md](python/README.md)、[rust/README.md](rust/README.md)、[java/README.md](java/README.md) 和 [cpp/README.md](cpp/README.md)。
+五套实现占用同一组端口，一次只跑一套。文件对照表在 [python/README.md](python/README.md)、[rust/README.md](rust/README.md)、[java/README.md](java/README.md)、[cpp/README.md](cpp/README.md) 和 [go/README.md](go/README.md)。
