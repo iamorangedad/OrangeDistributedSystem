@@ -38,3 +38,15 @@ Callers use only the gateway at `127.0.0.1:8080`. The other ports are internal.
 | Leader / follower store | 8301 / 8302 at startup | Single-leader writes; the follower replicates asynchronously. After failover the roles swap and the ports stay |
 | Supervisor | 8090 | Probe, restart, publish the current leader, and scale workers |
 | Workers | 8401 and up | 1 to 3. The port serves only probes and metrics; fulfillment talks to the leader store |
+
+## Two languages
+
+The same design is implemented twice, so the repository can be read as a language comparison. Python is the original. Rust repeats the same processes, ports, errors, and acceptance tests.
+
+| | Python | Rust |
+| --- | --- | --- |
+| Code | `orange/` | `rust/src/` |
+| Start | `python3 -m orange.supervisor --root .` | `cargo run --manifest-path rust/Cargo.toml -- --root .` |
+| Tests | `python3 -m unittest tests.test_common tests.test_acceptance` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` |
+
+Both stacks listen on the same ports. Run one at a time. The file-by-file map is in [rust/README.md](rust/README.md).
