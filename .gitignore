@@ -3,3 +3,5 @@ __pycache__/
 runtime/data/
 runtime/logs/
 rust/target/
+java/build/
+java/lib/

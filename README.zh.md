@@ -38,14 +38,14 @@ Orange 是一个跑在单机上的多进程下单系统，用来学习分布式�
 | 监督者 | 8090 | 探活、拉起、公布主节点、加减工人 |
 | 工人 | 8401 起 | 1 到 3 个；端口只提供探针和指标，履约时访问主存储 |
 
-## 两种语言
+## 三种语言
 
-同一份设计写了两遍，用来对照着学语言。Python 是最初的实现。Rust 重复同样的进程、端口、错误和验收。
+同一份设计写了三遍，用来对照着学语言。Python 是最初的实现。Rust 和 Java 重复同样的进程、端口、错误和验收。
 
-| | Python | Rust |
-| --- | --- | --- |
-| 代码 | `orange/` | `rust/src/` |
-| 启动 | `python3 -m orange.supervisor --root .` | `cargo run --manifest-path rust/Cargo.toml -- --root .` |
-| 测试 | `python3 -m unittest tests.test_common tests.test_acceptance` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` |
+| | Python | Rust | Java |
+| --- | --- | --- | --- |
+| 代码 | `orange/` | `rust/src/` | `java/src/orange/` |
+| 启动 | `python3 -m orange.supervisor --root .` | `cargo run --manifest-path rust/Cargo.toml -- --root .` | `java/build.sh --root .` |
+| 测试 | `python3 -m unittest tests.test_common tests.test_acceptance` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` | `java/build.sh test` |
 
-两套实现占用同一组端口，一次只跑一套。文件对照表在 [rust/README.md](rust/README.md)。
+三套实现占用同一组端口，一次只跑一套。文件对照表在 [rust/README.md](rust/README.md) 和 [java/README.md](java/README.md)。
