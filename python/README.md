@@ -1,10 +1,10 @@
 # Orange 的 Python 实现
 
-这一份是最初的实现，和 `rust/`、`java/`、`cpp/` 做同一件事：单机上的多进程下单。对外端口、错误码、日志事件和 AC-1 到 AC-12 都对齐技术方案。
+这一份是最初的实现，和 `rust/`、`java/`、`cpp/`、`go/` 做同一件事：单机上的多进程下单。对外端口、错误码、日志事件和 AC-1 到 AC-12 都对齐技术方案。
 
-Python 只用标准库和 sqlite3。代码放在 `python/src/orange/`，测试放在 `python/tests/`，和 Rust 的 `rust/src/`、`rust/tests/`、Java 的 `java/src/orange/`、`java/test/` 以及 C++ 的 `cpp/src/`、`cpp/tests/` 同一层。包名仍是 `orange`。
+Python 只用标准库和 sqlite3。代码放在 `python/src/orange/`，测试放在 `python/tests/`，和 Rust 的 `rust/src/`、Java 的 `java/src/orange/`、C++ 的 `cpp/src/` 以及 Go 的 `go/` 同一层。包名仍是 `orange`。
 
-一次只启动一种语言。四套都绑定 8080、8090、8101 这些端口。C++ 版在 `cpp/`。
+一次只启动一种语言。五套都绑定 8080、8090、8101 这些端口。Go 版在 `go/`。
 
 ## 怎么跑
 

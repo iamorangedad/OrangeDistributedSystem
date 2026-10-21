@@ -1,10 +1,10 @@
 # Orange 的 Rust 实现
 
-这一份和 `python/src/orange/` 里的 Python 实现做同一件事：单机上的多进程下单。对外端口、错误码、日志事件和 AC-1 到 AC-12 都对齐技术方案。Python、Java、C++ 都保留，四边可以对照着读。
+这一份和 `python/src/orange/` 里的 Python 实现做同一件事：单机上的多进程下单。对外端口、错误码、日志事件和 AC-1 到 AC-12 都对齐技术方案。Python、Java、C++、Go 都保留，五边可以对照着读。
 
 Rust 这边故意不用 Web 框架，也不用异步运行时。每个进程仍是一个线程加一把锁，HTTP 用标准库的 `TcpListener` 自己解析。这样读代码时看到的是接单、复制和熔断，而不是框架的生命周期。
 
-一次只启动一种语言。Python、Rust、Java、C++ 都绑定 8080、8090、8101 这些端口。Java 版在 `java/`，C++ 版在 `cpp/`。
+一次只启动一种语言。Python、Rust、Java、C++、Go 都绑定 8080、8090、8101 这些端口。Java 版在 `java/`，C++ 版在 `cpp/`，Go 版在 `go/`。
 
 ## 怎么跑
 
