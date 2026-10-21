@@ -1,0 +1,270 @@
+openapi: 3.0.3
+info:
+  title: Orange Order API
+  version: 0.1.0
+  description: |
+    External API of the single-machine order system. Callers use only the gateway.
+    A successful create and an idempotent replay both return 201. When degraded is true the order is still valid.
+    Internal ports, replication, and failover are outside this contract.
+servers:
+  - url: http://127.0.0.1:8080
+    description: Local gateway
+paths:
+  /v1/orders:
+    post:
+      operationId: createOrder
+      summary: Create an order or replay an existing one
+      parameters:
+        - $ref: "#/components/parameters/CallerId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/RequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrder"
+            example:
+              sku: gear-1
+              qty: 1
+              external_ref: cart-88
+              fulfill_url: http://127.0.0.1:9000/hooks/orange-fulfill
+      responses:
+        "201":
+          description: Accepted, or the key already has an order with the same body
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+        "503":
+          $ref: "#/components/responses/Error"
+        "504":
+          $ref: "#/components/responses/Error"
+    get:
+      operationId: getOrderByIdempotencyKey
+      summary: Find an order by idempotency key
+      parameters:
+        - $ref: "#/components/parameters/CallerId"
+        - $ref: "#/components/parameters/RequestId"
+        - name: idempotency_key
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 8
+            maxLength: 128
+      responses:
+        "200":
+          description: Current snapshot of the order
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+  /v1/orders/{order_id}:
+    get:
+      operationId: getOrder
+      summary: Read the current snapshot by order id
+      parameters:
+        - $ref: "#/components/parameters/CallerId"
+        - $ref: "#/components/parameters/RequestId"
+        - name: order_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Current snapshot; fulfillment may have advanced
+          headers:
+            X-Request-Id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          $ref: "#/components/responses/Error"
+  /health:
+    get:
+      operationId: health
+      summary: Liveness probe
+      responses:
+        "200":
+          description: The process can handle HTTP
+  /ready:
+    get:
+      operationId: ready
+      summary: Readiness probe
+      responses:
+        "200":
+          description: The gateway has at least one writable order replica
+        "503":
+          description: No writable replica, or the leader store is switching
+components:
+  parameters:
+    CallerId:
+      name: X-Caller-Id
+      in: header
+      required: true
+      schema:
+        type: string
+        pattern: "^[a-z0-9-]{1,32}$"
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 128
+    RequestId:
+      name: X-Request-Id
+      in: header
+      required: false
+      schema:
+        type: string
+  headers:
+    RequestId:
+      schema:
+        type: string
+      required: true
+    RetryAfter:
+      schema:
+        type: integer
+        minimum: 0
+      description: Seconds
+      required: true
+  responses:
+    Error:
+      description: The request failed
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+    RateLimited:
+      description: Tokens are exhausted, in-flight is full, or pending jobs hit the cap
+      headers:
+        X-Request-Id:
+          $ref: "#/components/headers/RequestId"
+        Retry-After:
+          $ref: "#/components/headers/RetryAfter"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+  schemas:
+    CreateOrder:
+      type: object
+      additionalProperties: true
+      required: [sku, qty]
+      properties:
+        sku:
+          type: string
+          minLength: 1
+          maxLength: 64
+        qty:
+          type: integer
+          minimum: 1
+          maximum: 100
+        external_ref:
+          type: string
+          maxLength: 128
+        fulfill_url:
+          type: string
+          description: Only an http://127.0.0.1 address, with no user info
+    Fulfillment:
+      type: object
+      required: [status, attempts, last_error]
+      properties:
+        status:
+          type: string
+          enum: [pending, inflight, done, dead]
+        attempts:
+          type: integer
+          minimum: 0
+        last_error:
+          type: string
+          nullable: true
+    Order:
+      type: object
+      required:
+        - order_id
+        - caller_id
+        - external_ref
+        - sku
+        - qty
+        - state
+        - recommendation
+        - degraded
+        - fulfillment
+        - epoch
+        - request_id
+      properties:
+        order_id:
+          type: string
+        caller_id:
+          type: string
+        external_ref:
+          type: string
+          nullable: true
+        sku:
+          type: string
+        qty:
+          type: integer
+        state:
+          type: string
+          enum: [accepted, fulfilled, fulfillment_failed]
+        recommendation:
+          type: string
+          nullable: true
+        degraded:
+          type: boolean
+        fulfillment:
+          $ref: "#/components/schemas/Fulfillment"
+        epoch:
+          type: integer
+          minimum: 1
+        request_id:
+          type: string
+    ErrorBody:
+      type: object
+      required: [code, message, request_id]
+      properties:
+        code:
+          type: string
+          enum:
+            - invalid_argument
+            - not_found
+            - idempotency_mismatch
+            - rate_limited
+            - unavailable
+            - deadline_exceeded
+        message:
+          type: string
+        request_id:
+          type: string
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          $ref: "#/components/schemas/ErrorBody"

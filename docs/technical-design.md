@@ -1,8 +1,10 @@
 # 技术方案
 
+英文版：[Technical design](en/technical-design.md)。
+
 | 项 | 值 |
 | --- | --- |
-| 状态 | 已接受的设计，尚未实现 |
+| 状态 | 设计 0.1 已实现 |
 | 版本 | 0.1 |
 | 日期 | 2026-10-10 |
 
@@ -12,9 +14,9 @@
 
 | 选择 | 决定 |
 | --- | --- |
-| 语言与运行时 | Python 3，标准库 `asyncio`、`sqlite3`、`json`、`urllib` |
+| 语言与运行时 | 五种实现服从本表。语言差异见 [ADR 0004](adr/0004-stdlib-sqlite.md)，不进入对外契约 |
 | 持久化 | 每个存储节点一个 sqlite 文件，`PRAGMA synchronous=FULL` |
-| 进程模型 | 监督者拉起独立进程，HTTP 用标准库服务器 |
+| 进程模型 | 监督者拉起独立进程，只监听 `127.0.0.1` |
 | 队列 | 主存储里的任务表，不部署消息中间件 |
 | 服务发现 | 监督者公布主存储地址；订单副本地址固定 |
 | 观测 | 每进程 JSON 行日志，加上文末列出的计数 |
@@ -210,20 +212,12 @@
 
 ## 代码布局
 
-实现开始后按这个布局，避免把机制藏进框架：
+五种实现并排，机制留在各自的进程代码里，不放进 Web 框架或容器编排。文件对照写在每种语言的 README 里。
 
 ```text
-python/src/orange/
-  common.py          截止时间、令牌桶、熔断、退避、日志、读故障文件
-  gateway.py
-  order_service.py
-  store.py
-  recommender.py
-  worker.py
-  supervisor.py
-runtime/
-  faults.json
-  data/
+python/   rust/   java/   cpp/   go/
+runtime/faults.json
+runtime/data/
 ```
 
 ## 实施顺序

@@ -1,5 +1,7 @@
 # ADR 0001：单主复制，用 epoch 隔离旧主
 
+英文版：[English](../en/adr/0001-single-leader.md)。
+
 - 状态：已接受
 - 日期：2026-10-10
 

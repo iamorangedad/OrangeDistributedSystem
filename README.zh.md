@@ -19,11 +19,11 @@ Orange 是一个跑在单机上的多进程下单系统，用来学习分布式�
 | [ADR 0001 单主](docs/adr/0001-single-leader.md) | 异步复制，用 epoch 隔离旧主 |
 | [ADR 0002 任务表](docs/adr/0002-job-table.md) | 用任务表充当队列 |
 | [ADR 0003 见证人](docs/adr/0003-supervisor-witness.md) | 只有监督者能提升主存储 |
-| [ADR 0004 技术栈](docs/adr/0004-stdlib-sqlite.md) | Python 标准库与 sqlite |
+| [ADR 0004 技术栈](docs/adr/0004-stdlib-sqlite.md) | 五种实现与 sqlite |
 | [ADR 0005 集成方式](docs/adr/0005-sync-poll-integration.md) | 同步下单、轮询履约、可选回调 |
 | [面试讲解](docs/interview.md) | 用本系统回答「如何设计一个分布式系统」 |
 
-集成方读 [集成指南](docs/integration.md) 和 [OpenAPI](docs/openapi.yaml) 即可开始对接。实现时以 [技术方案](docs/technical-design.md) 里的参数表为准。
+英文设计文档在 [docs/en](docs/en/overview.md)。集成方读 [集成指南](docs/integration.md) 和 [OpenAPI](docs/openapi.yaml) 即可开始对接。实现时以 [技术方案](docs/technical-design.md) 里的参数表为准。
 
 ## 进程一览
 
@@ -48,4 +48,4 @@ Orange 是一个跑在单机上的多进程下单系统，用来学习分布式�
 | 启动 | `python/run.sh --root .` | `cargo run --manifest-path rust/Cargo.toml -- --root .` | `java/build.sh --root .` | `cpp/build.sh --root .` | `go/run.sh --root .` |
 | 测试 | `python/run.sh test` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` | `java/build.sh test` | `cpp/build.sh test` | `go/run.sh test` |
 
-五套实现占用同一组端口，一次只跑一套。文件对照表在 [python/README.md](python/README.md)、[rust/README.md](rust/README.md)、[java/README.md](java/README.md)、[cpp/README.md](cpp/README.md) 和 [go/README.md](go/README.md)。
+五套实现占用同一组端口，一次只跑一套。文件对照表在 [python/README.md](python/README.md)、[rust/README.md](rust/README.md)、[java/README.md](java/README.md)、[cpp/README.md](cpp/README.md) 和 [go/README.md](go/README.md)。各目录里的 `README.en.md` 是对应英文说明。

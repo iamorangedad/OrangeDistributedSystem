@@ -1,10 +1,12 @@
 # Orange 的 Python 实现
 
-这一份是最初的实现，和 `rust/`、`java/`、`cpp/`、`go/` 做同一件事：单机上的多进程下单。对外端口、错误码、日志事件和 AC-1 到 AC-12 都对齐技术方案。
+[English](README.en.md)
 
-Python 只用标准库和 sqlite3。代码放在 `python/src/orange/`，测试放在 `python/tests/`，和 Rust 的 `rust/src/`、Java 的 `java/src/orange/`、C++ 的 `cpp/src/` 以及 Go 的 `go/` 同一层。包名仍是 `orange`。
+这一份是最初的实现，和 `rust/`、`java/`、`cpp/`、`go/` 做同一件事：单机上的多进程下单。对外端口、错误码、日志事件和 AC-1 到 AC-12 都对齐 [技术方案](../docs/technical-design.md)。语言差异见 [ADR 0004](../docs/adr/0004-stdlib-sqlite.md)。
 
-一次只启动一种语言。五套都绑定 8080、8090、8101 这些端口。Go 版在 `go/`。
+Python 只用标准库和 sqlite3。代码放在 `python/src/orange/`，测试放在 `python/tests/`。包名是 `orange`。监督者拉起 `python -m orange.xxx`。`python/run.sh` 会把 `python/src` 放进 `PYTHONPATH`。
+
+一次只启动一种语言。五套都绑定 8080、8090、8101 这些端口。
 
 ## 怎么跑
 
@@ -22,18 +24,18 @@ python/run.sh test
 
 验收测试会真的拉起监督者和全部子进程，大约需要一两分钟。端口固定，不能两套一起听。
 
-## 和另外两种语言怎么对应
+## 五种实现的文件对照
 
-监督者拉起的是 `python -m orange.xxx`。`python/run.sh` 会把 `python/src` 放进 `PYTHONPATH`。
+| 职责 | Python | Rust | Java | C++ | Go |
+| --- | --- | --- | --- | --- | --- |
+| 入口 | `python/src/orange/__main__.py` | `rust/src/main.rs` | `java/src/orange/Main.java` | `cpp/src/main.cpp` | `go/main.go` |
+| 公共库 | `python/src/orange/common.py` | `rust/src/common.rs`、`http_util.rs` | `Common.java`、`HttpUtil.java`、`Json.java` | `cpp/src/common.cpp`、`http.cpp`、`json.cpp` | `go/common.go`、`http.go` |
+| 网关 | `python/src/orange/gateway.py` | `rust/src/gateway.rs` | `java/src/orange/Gateway.java` | `cpp/src/gateway.cpp` | `go/gateway.go` |
+| 订单 | `python/src/orange/order_service.py` | `rust/src/order.rs` | `java/src/orange/OrderService.java` | `cpp/src/order.cpp` | `go/order.go` |
+| 推荐 | `python/src/orange/recommender.py` | `rust/src/recommender.rs` | `java/src/orange/Recommender.java` | `cpp/src/recommender.cpp` | `go/recommender.go` |
+| 存储 | `python/src/orange/store.py` | `rust/src/store.rs` | `java/src/orange/Store.java` | `cpp/src/store.cpp` | `go/store.go` |
+| 工人 | `python/src/orange/worker.py` | `rust/src/worker.rs` | `java/src/orange/Worker.java` | `cpp/src/worker.cpp` | `go/worker.go` |
+| 监督者 | `python/src/orange/supervisor.py` | `rust/src/supervisor.rs` | `java/src/orange/Supervisor.java` | `cpp/src/supervisor.cpp` | `go/supervisor.go` |
+| 验收 | `python/tests/` | `rust/tests/acceptance.rs` | `java/test/orange/Acceptance.java` | `cpp/tests/acceptance.cpp` | `go/acceptance/` |
 
-| 模块 | Python 文件 | Rust 文件 | Java 类 | 做什么 |
-| --- | --- | --- | --- | --- |
-| `orange.supervisor` | `python/src/orange/supervisor.py` | `rust/src/supervisor.rs` | `Supervisor` | 拉起进程、公布主存储、提升、加减工人 |
-| `orange.gateway` | `python/src/orange/gateway.py` | `rust/src/gateway.rs` | `Gateway` | 令牌桶、在途上限、转发给就绪副本 |
-| `orange.order_service` | `python/src/orange/order_service.py` | `rust/src/order.rs` | `OrderService` | 幂等、截止时间、推荐熔断 |
-| `orange.recommender` | `python/src/orange/recommender.py` | `rust/src/recommender.rs` | `Recommender` | 可失败的推荐旁路 |
-| `orange.store` | `python/src/orange/store.py` | `rust/src/store.rs` | `Store` | sqlite 订单、任务、复制日志、epoch |
-| `orange.worker` | `python/src/orange/worker.py` | `rust/src/worker.rs` | `Worker` | 向主存储领取任务并回调 |
-| （公共部分） | `python/src/orange/common.py` | `rust/src/common.rs`、`rust/src/http_util.rs` | `Common`、`HttpUtil`、`Json` | 参数、日志、限流、熔断、本机 HTTP |
-
-行为以 `docs/technical-design.md` 的参数表为准。
+Java 类都在 `java/src/orange/`。行为以技术方案的参数表为准。
