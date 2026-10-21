@@ -116,6 +116,9 @@ class Supervisor:
         env = os.environ.copy()
         env["ORANGE_ROOT"] = self.root
         env["ORANGE_PROCESS"] = name
+        src = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        current = env.get("PYTHONPATH")
+        env["PYTHONPATH"] = src if not current else src + os.pathsep + current
         proc = subprocess.Popen(self.command(name), env=env)
         self.procs[name] = proc
         self.pids[name] = proc.pid

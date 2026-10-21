@@ -213,7 +213,7 @@
 实现开始后按这个布局，避免把机制藏进框架：
 
 ```text
-orange/
+python/src/orange/
   common.py          截止时间、令牌桶、熔断、退避、日志、读故障文件
   gateway.py
   order_service.py
