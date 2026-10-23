@@ -53,7 +53,13 @@ OrangeOrder 是一个跑在单机上的多进程下单系统，用来学习分�
 | Go | `go/` | `go/run.sh --root .` | `go/run.sh test` |
 | TypeScript | `ts/src/` | `ts/run.sh --root .` | `ts/run.sh test` |
 
-六套实现占用同一组端口，一次只跑一套。每个语言目录里，`README.md` 是英文说明，`README.zh.md` 是中文说明。
+六套实现占用 8080、8090、8101 以及其余固定端口，一次只跑一套。调用方只访问 `http://127.0.0.1:8080`。下面的启动和测试命令都在仓库根目录执行。端口、错误码、日志事件和 AC-1 到 AC-12 以 [技术方案](docs/zh/technical-design.md) 为准。语言差异见 [ADR 0004](docs/zh/adr/0004-stdlib-sqlite.md)。六套都不用 Web 框架。
+
+验收会拉起监督者和全部子进程，大约一两分钟。端口固定，不能两套一起听。Rust 的测试因此加上 `--test-threads=1`。
+
+Python 用 `python -m orange.xxx` 拉起每个进程。其余五种是一个程序：不带子命令时它就是监督者，再以 `store`、`gateway`、`order`、`recommender`、`worker` 拉起自己。
+
+每个语言目录里，`README.md` 是英文说明，`README.zh.md` 是中文说明。
 
 ## 文件对照
 
