@@ -212,7 +212,7 @@ Keep these numbers in one place. Change the table before changing the behavior.
 
 ## Code layout
 
-The six implementations sit side by side. Mechanisms stay in each language’s process code, not in a web framework or a container orchestrator. File maps are in each language’s README.
+The six implementations sit side by side. Mechanisms stay in each language’s process code, not in a web framework or a container orchestrator. The file map is on the [homepage](../README.md).
 
 ```text
 python/   rust/   java/   cpp/   go/

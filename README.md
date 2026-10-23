@@ -52,4 +52,20 @@ The same design is implemented six times, so the repository can be read as a lan
 | Go | `go/` | `go/run.sh --root .` | `go/run.sh test` |
 | TypeScript | `ts/src/` | `ts/run.sh --root .` | `ts/run.sh test` |
 
-All six stacks listen on the same ports. Run one at a time. The file-by-file maps are in [python/README.md](python/README.md), [rust/README.md](rust/README.md), [java/README.md](java/README.md), [cpp/README.md](cpp/README.md), [go/README.md](go/README.md), and [ts/README.md](ts/README.md). Chinese copies sit beside them as `README.zh.md`.
+All six stacks listen on the same ports. Run one at a time. Each language directory has an English `README.md` and a Chinese `README.zh.md`.
+
+## File map
+
+| Role | Python | Rust | Java | C++ | Go | TypeScript |
+| --- | --- | --- | --- | --- | --- | --- |
+| Entry | `python/src/orange/__main__.py` | `rust/src/main.rs` | `java/src/orange/Main.java` | `cpp/src/main.cpp` | `go/main.go` | `ts/src/main.ts` |
+| Shared library | `python/src/orange/common.py` | `rust/src/common.rs`, `http_util.rs` | `Common.java`, `HttpUtil.java`, `Json.java` | `cpp/src/common.cpp`, `http.cpp`, `json.cpp` | `go/common.go`, `http.go` | `ts/src/common.ts`, `http.ts` |
+| Gateway | `python/src/orange/gateway.py` | `rust/src/gateway.rs` | `java/src/orange/Gateway.java` | `cpp/src/gateway.cpp` | `go/gateway.go` | `ts/src/gateway.ts` |
+| Order | `python/src/orange/order_service.py` | `rust/src/order.rs` | `java/src/orange/OrderService.java` | `cpp/src/order.cpp` | `go/order.go` | `ts/src/order.ts` |
+| Recommender | `python/src/orange/recommender.py` | `rust/src/recommender.rs` | `java/src/orange/Recommender.java` | `cpp/src/recommender.cpp` | `go/recommender.go` | `ts/src/recommender.ts` |
+| Store | `python/src/orange/store.py` | `rust/src/store.rs` | `java/src/orange/Store.java` | `cpp/src/store.cpp` | `go/store.go` | `ts/src/store.ts` |
+| Worker | `python/src/orange/worker.py` | `rust/src/worker.rs` | `java/src/orange/Worker.java` | `cpp/src/worker.cpp` | `go/worker.go` | `ts/src/worker.ts` |
+| Supervisor | `python/src/orange/supervisor.py` | `rust/src/supervisor.rs` | `java/src/orange/Supervisor.java` | `cpp/src/supervisor.cpp` | `go/supervisor.go` | `ts/src/supervisor.ts` |
+| Acceptance | `python/tests/` | `rust/tests/acceptance.rs` | `java/test/orange/Acceptance.java` | `cpp/tests/acceptance.cpp` | `go/acceptance/` | `ts/src/acceptance.test.ts` |
+
+Java classes live in `java/src/orange/`. Behavior follows the parameter table in the technical design.
