@@ -52,7 +52,13 @@ The same design is implemented six times, so the repository can be read as a lan
 | Go | `go/` | `go/run.sh --root .` | `go/run.sh test` |
 | TypeScript | `ts/src/` | `ts/run.sh --root .` | `ts/run.sh test` |
 
-All six stacks listen on the same ports. Run one at a time. Each language directory has an English `README.md` and a Chinese `README.zh.md`.
+All six stacks listen on 8080, 8090, 8101, and the other fixed ports. Run one language at a time. Callers use only `http://127.0.0.1:8080`. Start and test commands are run from the repository root. Ports, error codes, log events, and AC-1 through AC-12 follow the [technical design](docs/technical-design.md). Language differences are in [ADR 0004](docs/adr/0004-stdlib-sqlite.md). None of the six uses a web framework.
+
+The acceptance test starts the supervisor and every child. It takes about a minute or two. The ports are fixed, so two stacks cannot listen together. Rust tests pass `--test-threads=1` for that reason.
+
+Python starts each process with `python -m orange.xxx`. The other five are one program: with no subcommand it is the supervisor, and it starts `store`, `gateway`, `order`, `recommender`, and `worker` as that same program.
+
+Each language directory has an English `README.md` and a Chinese `README.zh.md`.
 
 ## File map
 
