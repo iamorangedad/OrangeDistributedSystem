@@ -134,4 +134,4 @@ claim、ack、fail 只接受当前主存储上的请求。从存储对这些路�
 
 ## 履约回调
 
-这是 Orange 调用外部项目，不是外部项目调用 Orange。正文和状态码约定写在 [集成指南](integration.md)。超时 1 秒，不跟随重定向。
+这是 OrangeOrder 调用外部项目，不是外部项目调用 OrangeOrder。正文和状态码约定写在 [集成指南](integration.md)。超时 1 秒，不跟随重定向。

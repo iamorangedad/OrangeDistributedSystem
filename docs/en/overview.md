@@ -12,7 +12,7 @@ Chinese: [系统概述](../overview.md).
 
 The learning goal is a small distributed system that still has the important organs: it tolerates faults, it grows and shrinks with backlog, and faults can be injected on this machine so the result is visible.
 
-Another project needs order submission. Orange makes “submit one order” its own system. Callers integrate over HTTP. The catalog and payment stay out of Orange.
+Another project needs order submission. OrangeOrder makes “submit one order” its own system. Callers integrate over HTTP. The catalog and payment stay out of OrangeOrder.
 
 ## Problems
 
@@ -32,7 +32,7 @@ One order submission meets all of these constraints:
 
 ## Boundary
 
-Orange owns:
+OrangeOrder owns:
 
 - Accepting and persisting an order
 - Idempotency
@@ -45,7 +45,7 @@ The caller owns:
 - Catalog, price, stock, and cart
 - Whether this business order is allowed
 - The business action at the fulfillment URL (stock decrement, user notification, and so on)
-- Recording Orange’s `order_id`, or the caller’s own `external_ref`, in the caller’s data
+- Recording OrangeOrder’s `order_id`, or the caller’s own `external_ref`, in the caller’s data
 
 Version one does not include multi-region active-active, multi-leader writes, CQRS, Raft/Paxos, a separate message broker, container orchestration, a service mesh, an edge CDN, a hosted chaos platform, autoscaling by CPU or latency, or caller authentication. Any local process that can reach `127.0.0.1:8080` can submit an order.
 
@@ -61,7 +61,7 @@ Version one does not include multi-region active-active, multi-leader writes, CQ
 
 | Term | Meaning |
 | --- | --- |
-| Caller | The other project that integrates with Orange |
+| Caller | The other project that integrates with OrangeOrder |
 | Order | One accepted submission |
 | Job | Fulfillment work attached to an order, stored in the leader’s job table |
 | epoch | A monotonically increasing write generation. Writes from an older generation are rejected |

@@ -18,7 +18,7 @@
 flowchart LR
   caller[调用方项目]
   operator[本机实验者]
-  subgraph orange [Orange]
+  subgraph orange [OrangeOrder]
     gateway[网关]
   end
   caller -->|"HTTP /v1/orders"| gateway
@@ -27,7 +27,7 @@ flowchart LR
 
 ## 进程架构
 
-![Orange 进程架构](diagrams/process-topology.svg)
+![OrangeOrder 进程架构](diagrams/process-topology.svg)
 
 写路径是：调用方 → 网关 → 一个就绪的订单进程 → 主存储。主存储在同一次提交里写下订单和履约任务，fsync 之后才向订单进程确认。从存储随后复制这条日志。
 
@@ -177,7 +177,7 @@ stateDiagram-v2
 全部进程在同一台机器、同一个工作目录中。
 
 ```text
-OrangeDistributedSystem/
+OrangeOrder/
   python/  rust/  java/  cpp/  go/   五种实现，一次只跑一种
   runtime/faults.json                 故障开关
   runtime/data/                       两个 sqlite 文件，由存储进程自己创建

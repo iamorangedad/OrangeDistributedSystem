@@ -8,9 +8,9 @@ Chinese: [面试讲解](../interview.md).
 | Version | 0.1 |
 | Date | 2026-10-14 |
 
-This note shows how to answer “design a distributed system” with Orange. It is not a second specification. Parameters, fault details, and acceptance follow the [technical design](technical-design.md). Structure follows the [architecture](architecture.md). The reasons are in the [ADRs](adr/).
+This note shows how to answer “design a distributed system” with OrangeOrder. It is not a second specification. Parameters, fault details, and acceptance follow the [technical design](technical-design.md). Structure follows the [architecture](architecture.md). The reasons are in the [ADRs](adr/).
 
-The interview tests whether you draw the boundary first and then make failure behavior definite. Orange is a multi-process order system on one machine. Idempotency, degradation, asynchronous fulfillment, single-leader failover, and scaling by backlog are rules that can be demonstrated and questioned.
+The interview tests whether you draw the boundary first and then make failure behavior definite. OrangeOrder is a multi-process order system on one machine. Idempotency, degradation, asynchronous fulfillment, single-leader failover, and scaling by backlog are rules that can be demonstrated and questioned.
 
 ## Opening
 

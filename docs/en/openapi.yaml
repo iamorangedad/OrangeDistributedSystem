@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Orange Order API
+  title: OrangeOrder API
   version: 0.1.0
   description: |
     External API of the single-machine order system. Callers use only the gateway.

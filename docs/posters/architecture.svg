@@ -18,7 +18,7 @@
   <text x="51" y="60" font-size="18" fill="#2f6fd6" text-anchor="middle" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">O</text>
   <rect x="86" y="32" width="92" height="26" rx="6" fill="#1c1c1c"/>
   <text x="132" y="50" font-size="13" fill="#ffffff" text-anchor="middle" font-weight="600" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">架构</text>
-  <text x="188" y="50" font-size="13" fill="#5c5c5c" text-anchor="start" font-weight="500" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">Orange 学习海报</text>
+  <text x="188" y="50" font-size="13" fill="#5c5c5c" text-anchor="start" font-weight="500" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">OrangeOrder 学习海报</text>
   <text x="40" y="122" font-size="36" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">系统怎么接在一起</text>
   <rect x="28" y="142" width="824" height="48" rx="8" fill="#ffffff" stroke="#2f6fd6" stroke-width="1.6"/>
   <rect x="28" y="142" width="8" height="48" fill="#2f6fd6"/>

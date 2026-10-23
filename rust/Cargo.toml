@@ -2,7 +2,7 @@
 name = "orange"
 version = "0.1.0"
 edition = "2021"
-description = "Orange order system, Rust implementation of the same design as the Python package."
+description = "OrangeOrder, Rust implementation of the same design as the Python package."
 
 [[bin]]
 name = "orange"

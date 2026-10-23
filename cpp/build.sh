@@ -1,5 +1,5 @@
 #!/bin/sh
-# 编译 C++ 版 Orange。sqlite3.h 不在系统头文件里，所以第一次运行会下载 3.37.2 的合并头，
+# 编译 C++ 版 OrangeOrder。sqlite3.h 不在系统头文件里，所以第一次运行会下载 3.37.2 的合并头，
 # 再链接系统里的 libsqlite3。不要把下载的头文件提交进仓库。
 set -eu
 cd "$(dirname "$0")/.."
