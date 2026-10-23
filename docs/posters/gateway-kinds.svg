@@ -54,7 +54,7 @@
 <text x="60" y="826" font-size="16" fill="#c4550a" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">对外契约</text>
 <text x="180" y="826" font-size="15" fill="#1c1c1c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">API 网关。调用方依赖的是这份契约，不是内部进程。</text>
 <text x="40" y="890" font-size="28" fill="#e07a2f" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">03</text>
-<text x="108" y="890" font-size="24" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">Orange 的网关放在哪</text>
+<text x="108" y="890" font-size="24" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">OrangeOrder 的网关放在哪</text>
 <text x="108" y="916" font-size="14" fill="#5c5c5c" text-anchor="start" font-weight="400" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">它是 API 网关这一类里的最小例子。</text>
 <rect x="40" y="960" width="800" height="88" rx="8" fill="#fff6f0" stroke="#c4550a" stroke-width="2"/>
 <text x="60" y="996" font-size="16" fill="#1c1c1c" text-anchor="start" font-weight="700" font-family="Noto Sans CJK SC, Noto Sans CJK JP, sans-serif">一个对外地址 :8080</text>

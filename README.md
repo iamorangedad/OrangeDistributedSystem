@@ -1,6 +1,6 @@
-# Orange Order System
+# OrangeOrder
 
-Orange is a single-machine, multi-process order system for learning resilience and elasticity in distributed systems, and for giving another project a stable place to submit orders.
+OrangeOrder is a single-machine, multi-process order system for learning resilience and elasticity in distributed systems, and for giving another project a stable place to submit orders.
 
 Current status: **design 0.1 is implemented.** The caller owns the catalog, prices, and cart. This system accepts the order, stores it, degrades when recommendation is unavailable, fulfills asynchronously, and fails over between a leader and a follower.
 
@@ -16,7 +16,7 @@ Current status: **design 0.1 is implemented.** The caller owns the catalog, pric
 | [API](docs/en/api.md) | Public semantics and inter-process interfaces |
 | [OpenAPI](docs/en/openapi.yaml) | Machine-readable public contract, in English |
 | [Data model](docs/en/data-model.md) | Tables, the replication log, and states |
-| [Integration guide](docs/en/integration.md) | How another project calls Orange |
+| [Integration guide](docs/en/integration.md) | How another project calls OrangeOrder |
 | [ADR 0001 Single leader](docs/en/adr/0001-single-leader.md) | Asynchronous replication, with an epoch that fences the old leader |
 | [ADR 0002 Job table](docs/en/adr/0002-job-table.md) | The job table is the queue |
 | [ADR 0003 Witness](docs/en/adr/0003-supervisor-witness.md) | Only the supervisor may promote a store |

@@ -49,7 +49,7 @@ erDiagram
 | caller_id | TEXT | From `X-Caller-Id` |
 | idempotency_key | TEXT | From `Idempotency-Key` |
 | external_ref | TEXT | Caller reference, nullable |
-| sku | TEXT | Item id supplied by the caller. Orange does not interpret it |
+| sku | TEXT | Item id supplied by the caller. OrangeOrder does not interpret it |
 | qty | INTEGER | 1 to 100 |
 | fulfill_url | TEXT | Nullable. Only a validated local address is stored |
 | state | TEXT | `accepted`, `fulfilled`, `fulfillment_failed` |

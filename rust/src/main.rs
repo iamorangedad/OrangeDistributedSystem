@@ -1,4 +1,4 @@
-//! Orange 的 Rust 实现。一个程序，用子命令区分进程，方便和 Python 包对照着读。
+//! OrangeOrder 的 Rust 实现。一个程序，用子命令区分进程，方便和 Python 包对照着读。
 
 mod common;
 mod gateway;

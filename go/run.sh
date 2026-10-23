@@ -1,5 +1,5 @@
 #!/bin/sh
-# 编译并启动 Go 版 Orange。test 先编译，再跑单元检查和 AC-1 到 AC-12。
+# 编译并启动 Go 版 OrangeOrder。test 先编译，再跑单元检查和 AC-1 到 AC-12。
 set -eu
 cd "$(dirname "$0")"
 mkdir -p bin

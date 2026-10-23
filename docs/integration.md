@@ -7,7 +7,7 @@
 | 状态 | 设计 0.1 已实现 |
 | 版本 | 0.1 |
 | 日期 | 2026-10-10 |
-| 读者 | 要调用 Orange 的另一个项目 |
+| 读者 | 要调用 OrangeOrder 的另一个项目 |
 
 机器可读契约是 [OpenAPI](openapi.yaml)。本文说明调用方要遵守的行为。
 
@@ -15,13 +15,13 @@
 
 | 事情 | 谁做 |
 | --- | --- |
-| 商品、价格、库存是否够、要不要卖 | 调用方，在调用 Orange 之前决定 |
-| 接单、幂等、保存、主从切换 | Orange |
-| 推荐文案 | Orange 的旁路。缺失时订单仍然有效 |
+| 商品、价格、库存是否够、要不要卖 | 调用方，在调用 OrangeOrder 之前决定 |
+| 接单、幂等、保存、主从切换 | OrangeOrder |
+| 推荐文案 | OrangeOrder 的旁路。缺失时订单仍然有效 |
 | 履约业务动作 | 调用方，如果提供了 `fulfill_url` |
-| 记住两边的单号 | 调用方保存 `order_id`，Orange 保存 `external_ref` |
+| 记住两边的单号 | 调用方保存 `order_id`，OrangeOrder 保存 `external_ref` |
 
-Orange 不校验 `sku` 是否存在，也不保存金额。
+OrangeOrder 不校验 `sku` 是否存在，也不保存金额。
 
 ## 接入
 
@@ -73,7 +73,7 @@ Idempotency-Key: cart-88-attempt-1
 
 `degraded=true` 表示推荐没有取到，订单已经接受。调用方应当把 201 当成下单成功，把 `degraded` 当成附加信息。
 
-`state=accepted` 只表示 Orange 已经保存订单。履约要看 `fulfillment.status`，或者等 `state` 变成 `fulfilled` / `fulfillment_failed`。
+`state=accepted` 只表示 OrangeOrder 已经保存订单。履约要看 `fulfillment.status`，或者等 `state` 变成 `fulfilled` / `fulfillment_failed`。
 
 ## 幂等
 
@@ -87,7 +87,7 @@ Idempotency-Key: cart-88-attempt-1
 
 ## 调用方超时与重试
 
-Orange 内部给一次下单 800ms。调用方自己的 HTTP 超时建议设为 **1.5 秒**，略长于内部截止时间，以便收到明确的错误码而不是只看到连接断开。
+OrangeOrder 内部给一次下单 800ms。调用方自己的 HTTP 超时建议设为 **1.5 秒**，略长于内部截止时间，以便收到明确的错误码而不是只看到连接断开。
 
 | 结果 | 调用方动作 |
 | --- | --- |
@@ -131,7 +131,7 @@ X-Caller-Id: gear-card
 
 ## 履约回调
 
-请求里的 `fulfill_url` 可省略。省略时 Orange 在本地把任务标成完成，用来单独运行和演示。
+请求里的 `fulfill_url` 可省略。省略时 OrangeOrder 在本地把任务标成完成，用来单独运行和演示。
 
 提供时，工人向该地址 POST：
 
@@ -149,9 +149,9 @@ X-Caller-Id: gear-card
 约定：
 
 - 地址的主机必须是 `127.0.0.1`，方案必须是 `http`。其他地址在创建订单时会被 400 拒绝。
-- 返回 2xx：Orange 把订单标为 `fulfilled`。
-- 返回 409：调用方表示这笔 `order_id` 已经处理过。Orange 也视为成功。
-- 其他状态或超时：Orange 稍后重试，最多 5 次，然后订单变为 `fulfillment_failed`。
+- 返回 2xx：OrangeOrder 把订单标为 `fulfilled`。
+- 返回 409：调用方表示这笔 `order_id` 已经处理过。OrangeOrder 也视为成功。
+- 其他状态或超时：OrangeOrder 稍后重试，最多 5 次，然后订单变为 `fulfillment_failed`。
 - 同一次履约可能送达多次。调用方用 `order_id` 去重。
 
 ## 故障时调用方会看到什么

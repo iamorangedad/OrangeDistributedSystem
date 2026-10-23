@@ -49,7 +49,7 @@ erDiagram
 | caller_id | TEXT | 来自 `X-Caller-Id` |
 | idempotency_key | TEXT | 来自 `Idempotency-Key` |
 | external_ref | TEXT | 调用方单号，可空 |
-| sku | TEXT | 调用方给出的商品标识，Orange 不解释 |
+| sku | TEXT | 调用方给出的商品标识，OrangeOrder 不解释 |
 | qty | INTEGER | 1 到 100 |
 | fulfill_url | TEXT | 可空。只保存已通过校验的本机地址 |
 | state | TEXT | `accepted`、`fulfilled`、`fulfillment_failed` |

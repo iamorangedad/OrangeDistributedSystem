@@ -7,7 +7,7 @@ Chinese: [集成指南](../integration.md).
 | Status | Design 0.1 is implemented |
 | Version | 0.1 |
 | Date | 2026-10-10 |
-| Reader | Another project that calls Orange |
+| Reader | Another project that calls OrangeOrder |
 
 The machine-readable contract is [OpenAPI](openapi.yaml). This document describes the behavior the caller must follow.
 
@@ -15,13 +15,13 @@ The machine-readable contract is [OpenAPI](openapi.yaml). This document describe
 
 | Work | Who |
 | --- | --- |
-| Catalog, price, whether stock is enough, whether to sell | The caller, before calling Orange |
-| Accept, idempotency, persistence, leader failover | Orange |
-| Recommendation text | An Orange side path. If it is missing, the order is still valid |
+| Catalog, price, whether stock is enough, whether to sell | The caller, before calling OrangeOrder |
+| Accept, idempotency, persistence, leader failover | OrangeOrder |
+| Recommendation text | A side path in OrangeOrder. If it is missing, the order is still valid |
 | The business action of fulfillment | The caller, if it supplied `fulfill_url` |
-| Remembering both ids | The caller stores `order_id`. Orange stores `external_ref` |
+| Remembering both ids | The caller stores `order_id`. OrangeOrder stores `external_ref` |
 
-Orange does not check that `sku` exists, and it does not store a price.
+OrangeOrder does not check that `sku` exists, and it does not store a price.
 
 ## Connect
 
@@ -73,7 +73,7 @@ On success, HTTP 201:
 
 `degraded=true` means recommendation was not obtained and the order was still accepted. The caller should treat 201 as success and `degraded` as extra information.
 
-`state=accepted` only means Orange has saved the order. Fulfillment is `fulfillment.status`, or waiting until `state` becomes `fulfilled` or `fulfillment_failed`.
+`state=accepted` only means OrangeOrder has saved the order. Fulfillment is `fulfillment.status`, or waiting until `state` becomes `fulfilled` or `fulfillment_failed`.
 
 ## Idempotency
 
@@ -87,7 +87,7 @@ Version one’s token bucket is global on the gateway. It refills 10 tokens per 
 
 ## Caller timeout and retry
 
-Orange gives one order submission 800ms internally. The caller’s own HTTP timeout should be **1.5 seconds**, a little longer than the internal deadline, so the caller receives a definite error code instead of only a dropped connection.
+OrangeOrder gives one order submission 800ms internally. The caller’s own HTTP timeout should be **1.5 seconds**, a little longer than the internal deadline, so the caller receives a definite error code instead of only a dropped connection.
 
 | Result | Caller action |
 | --- | --- |
@@ -131,7 +131,7 @@ Poll about once a second, and stop after fulfillment succeeds or fails. Version 
 
 ## Fulfillment callback
 
-`fulfill_url` may be omitted. Orange then marks the job done locally, which is enough to run and demonstrate the system alone.
+`fulfill_url` may be omitted. OrangeOrder then marks the job done locally, which is enough to run and demonstrate the system alone.
 
 When it is set, the worker POSTs:
 
@@ -149,9 +149,9 @@ When it is set, the worker POSTs:
 Rules:
 
 - The host must be `127.0.0.1` and the scheme must be `http`. Any other address is rejected with 400 when the order is created.
-- 2xx: Orange marks the order `fulfilled`.
-- 409: the caller says this `order_id` was already handled. Orange also treats that as success.
-- Any other status or a timeout: Orange retries later, at most 5 times, then the order becomes `fulfillment_failed`.
+- 2xx: OrangeOrder marks the order `fulfilled`.
+- 409: the caller says this `order_id` was already handled. OrangeOrder also treats that as success.
+- Any other status or a timeout: OrangeOrder retries later, at most 5 times, then the order becomes `fulfillment_failed`.
 - The same fulfillment may be delivered more than once. The caller deduplicates by `order_id`.
 
 ## What the caller sees during a fault

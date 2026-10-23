@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  title: Orange Order API
+  title: OrangeOrder API
   version: 0.1.0
   description: |
     单机下单系统的对外接口。调用方只访问网关。

@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 420" role="img" aria-labelledby="title desc">
-  <title id="title">Orange 进程架构</title>
+  <title id="title">OrangeOrder 进程架构</title>
   <desc id="desc">调用方经网关访问订单副本，订单写入唯一主存储，从存储异步复制。推荐可失败，工人向主存储领取任务，监督者位于控制面。</desc>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">

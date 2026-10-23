@@ -114,13 +114,13 @@ The agreement that day was: the supervisor starts the processes, and each store 
 
 ## Change CHG-2: design documents relative to the review canvas
 
-Date: later on 2026-10-10. Two triggers: another project needed Orange as an order entrance; turning the canvas into an implementable design required a few counts and semantics to be fixed.
+Date: later on 2026-10-10. Two triggers: another project needed OrangeOrder as an order entrance; turning the canvas into an implementable design required a few counts and semantics to be fixed.
 
 This change does not overturn the judgments in CHG-1. The rows below are only the requirements that moved relative to the canvas.
 
 | Id | Relative to the canvas | Requirement after the change | Where it landed |
 | --- | --- | --- | --- |
-| R2-1 | The canvas only said the client places an order, with no external boundary | The caller owns catalog, price, stock, and cart. Orange does not interpret sku and does not store an amount | [Overview](overview.md), [Integration guide](integration.md) |
+| R2-1 | The canvas only said the client places an order, with no external boundary | The caller owns catalog, price, stock, and cart. OrangeOrder does not interpret sku and does not store an amount | [Overview](overview.md), [Integration guide](integration.md) |
 | R2-2 | The canvas had no caller identity | Every request carries `X-Caller-Id`. An idempotency key is scoped to one caller | [API](api.md) |
 | R2-3 | The canvas had no caller reference or fulfillment URL | Add optional `external_ref`. `fulfill_url` is optional and only `http://127.0.0.1` is allowed. If omitted, the worker marks the job done locally | [ADR 0005](adr/0005-sync-poll-integration.md) |
 | R2-4 | The canvas had no query method | Fulfillment progress is polled with GET. Version one has no webhook | [Integration guide](integration.md) |
@@ -156,3 +156,13 @@ This change does not alter ports, errors, logs, parameters, or AC-1 through AC-1
 | --- | --- | --- | --- |
 | R3-1 | The implementation agreement mentioned only the Python standard library | Five implementations side by side: Python, Rust, Java, C++, and Go. Run one at a time, because the ports are the same | [ADR 0004](adr/0004-stdlib-sqlite.md), each language README |
 | R3-2 | The technical design named the runtime as the Python standard library | Language differences stay in ADR 0004 and the language READMEs. The technical design keeps only language-neutral parameters and behavior | [Technical design](technical-design.md) |
+
+## Change CHG-4: the project is renamed OrangeOrder
+
+Date: 2026-10-22. Trigger: the repository name OrangeDistributedSystem described a one-machine order system as a distributed platform.
+
+This change renames the project as presented to readers. Ports, errors, logs, parameters, acceptance tests, and the module name in all five languages stay the same. The Python package, Java package, Rust package, Go module, and executable remain `orange`.
+
+| Id | Relative to CHG-3 | Requirement after the change | Where it landed |
+| --- | --- | --- | --- |
+| R4-1 | The public name was Orange, and the repository was OrangeDistributedSystem | The project name is OrangeOrder. Documents, the API title, and diagrams use that name | Homepage, design docs, OpenAPI |

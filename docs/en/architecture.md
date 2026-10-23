@@ -18,7 +18,7 @@ The caller depends only on the gateway. Catalog and price stay with the caller. 
 flowchart LR
   caller[Caller project]
   operator[Local experimenter]
-  subgraph orange [Orange]
+  subgraph orange [OrangeOrder]
     gateway[Gateway]
   end
   caller -->|"HTTP /v1/orders"| gateway
@@ -27,7 +27,7 @@ flowchart LR
 
 ## Process architecture
 
-![Orange process architecture](../diagrams/process-topology.svg)
+![OrangeOrder process architecture](../diagrams/process-topology.svg)
 
 The write path is caller → gateway → one ready order process → leader store. The leader writes the order and the fulfillment job in one commit, and confirms to the order process only after fsync. The follower then replicates that log.
 
@@ -177,7 +177,7 @@ While it is open, the order process does not connect to recommendation and degra
 Every process is on the same machine and in the same working directory.
 
 ```text
-OrangeDistributedSystem/
+OrangeOrder/
   python/  rust/  java/  cpp/  go/   five implementations; run one
   runtime/faults.json                 fault switches
   runtime/data/                       two sqlite files, created by the store processes

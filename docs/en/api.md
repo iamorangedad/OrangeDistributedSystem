@@ -134,4 +134,4 @@ claim, ack, and fail are accepted only on the current leader. The follower retur
 
 ## Fulfillment callback
 
-This is Orange calling the other project, not the other project calling Orange. The body and status codes are in the [integration guide](integration.md). The timeout is 1 second. Redirects are not followed.
+This is OrangeOrder calling the other project, not the other project calling OrangeOrder. The body and status codes are in the [integration guide](integration.md). The timeout is 1 second. Redirects are not followed.
