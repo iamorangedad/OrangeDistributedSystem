@@ -14,7 +14,7 @@ This document is the source for implementation. Structure and state machines are
 
 | Choice | Decision |
 | --- | --- |
-| Language and runtime | Five implementations follow this table. Language differences are in [ADR 0004](adr/0004-stdlib-sqlite.md) and do not enter the external contract |
+| Language and runtime | Six implementations follow this table. Language differences are in [ADR 0004](adr/0004-stdlib-sqlite.md) and do not enter the external contract |
 | Persistence | One sqlite file per store node, `PRAGMA synchronous=FULL` |
 | Process model | The supervisor starts independent processes. They listen only on `127.0.0.1` |
 | Queue | The job table on the leader store. No message broker is deployed |
@@ -212,7 +212,7 @@ Keep these numbers in one place. Change the table before changing the behavior.
 
 ## Code layout
 
-The five implementations sit side by side. Mechanisms stay in each language’s process code, not in a web framework or a container orchestrator. File maps are in each language’s README.
+The six implementations sit side by side. Mechanisms stay in each language’s process code, not in a web framework or a container orchestrator. File maps are in each language’s README.
 
 ```text
 python/   rust/   java/   cpp/   go/

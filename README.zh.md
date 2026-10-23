@@ -19,7 +19,7 @@ OrangeOrder 是一个跑在单机上的多进程下单系统，用来学习分�
 | [ADR 0001 单主](docs/adr/0001-single-leader.md) | 异步复制，用 epoch 隔离旧主 |
 | [ADR 0002 任务表](docs/adr/0002-job-table.md) | 用任务表充当队列 |
 | [ADR 0003 见证人](docs/adr/0003-supervisor-witness.md) | 只有监督者能提升主存储 |
-| [ADR 0004 技术栈](docs/adr/0004-stdlib-sqlite.md) | 五种实现与 sqlite |
+| [ADR 0004 技术栈](docs/adr/0004-stdlib-sqlite.md) | 六种实现与 sqlite |
 | [ADR 0005 集成方式](docs/adr/0005-sync-poll-integration.md) | 同步下单、轮询履约、可选回调 |
 | [面试讲解](docs/interview.md) | 用本系统回答「如何设计一个分布式系统」 |
 
@@ -38,9 +38,9 @@ OrangeOrder 是一个跑在单机上的多进程下单系统，用来学习分�
 | 监督者 | 8090 | 探活、拉起、公布主节点、加减工人 |
 | 工人 | 8401 起 | 1 到 3 个；端口只提供探针和指标，履约时访问主存储 |
 
-## 五种语言
+## 六种语言
 
-同一份设计写了五遍，用来对照着学语言。Python 是最初的实现。Rust、Java、C++ 和 Go 重复同样的进程、端口、错误和验收。
+同一份设计写了六遍，用来对照着学语言。Python 是最初的实现。Rust、Java、C++、Go 和 TypeScript 重复同样的进程、端口、错误和验收。
 
 | | 代码 | 启动 | 测试 |
 | --- | --- | --- | --- |
@@ -49,5 +49,6 @@ OrangeOrder 是一个跑在单机上的多进程下单系统，用来学习分�
 | Java | `java/src/orange/` | `java/build.sh --root .` | `java/build.sh test` |
 | C++ | `cpp/src/` | `cpp/build.sh --root .` | `cpp/build.sh test` |
 | Go | `go/` | `go/run.sh --root .` | `go/run.sh test` |
+| TypeScript | `ts/src/` | `ts/run.sh --root .` | `ts/run.sh test` |
 
-五套实现占用同一组端口，一次只跑一套。文件对照表在 [python/README.md](python/README.md)、[rust/README.md](rust/README.md)、[java/README.md](java/README.md)、[cpp/README.md](cpp/README.md) 和 [go/README.md](go/README.md)。各目录里的 `README.en.md` 是对应英文说明。
+六套实现占用同一组端口，一次只跑一套。文件对照表在 [python/README.md](python/README.md)、[rust/README.md](rust/README.md)、[java/README.md](java/README.md)、[cpp/README.md](cpp/README.md)、[go/README.md](go/README.md) 和 [ts/README.md](ts/README.md)。各目录里的 `README.en.md` 是对应英文说明。

@@ -178,7 +178,7 @@ stateDiagram-v2
 
 ```text
 OrangeOrder/
-  python/  rust/  java/  cpp/  go/   五种实现，一次只跑一种
+  python/  rust/  java/  cpp/  go/  ts/   六种实现，一次只跑一种
   runtime/faults.json                 故障开关
   runtime/data/                       两个 sqlite 文件，由存储进程自己创建
 ```

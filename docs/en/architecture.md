@@ -178,7 +178,7 @@ Every process is on the same machine and in the same working directory.
 
 ```text
 OrangeOrder/
-  python/  rust/  java/  cpp/  go/   five implementations; run one
+  python/  rust/  java/  cpp/  go/  ts/   six implementations; run one
   runtime/faults.json                 fault switches
   runtime/data/                       two sqlite files, created by the store processes
 ```

@@ -20,7 +20,7 @@ Current status: **design 0.1 is implemented.** The caller owns the catalog, pric
 | [ADR 0001 Single leader](docs/en/adr/0001-single-leader.md) | Asynchronous replication, with an epoch that fences the old leader |
 | [ADR 0002 Job table](docs/en/adr/0002-job-table.md) | The job table is the queue |
 | [ADR 0003 Witness](docs/en/adr/0003-supervisor-witness.md) | Only the supervisor may promote a store |
-| [ADR 0004 Stack](docs/en/adr/0004-stdlib-sqlite.md) | Five implementations, each with its own sqlite |
+| [ADR 0004 Stack](docs/en/adr/0004-stdlib-sqlite.md) | Six implementations, each with its own sqlite |
 | [ADR 0005 Integration](docs/en/adr/0005-sync-poll-integration.md) | Synchronous submit, poll for fulfillment, optional callback |
 | [Interview walkthrough](docs/en/interview.md) | How to use this system to answer “design a distributed system” |
 
@@ -39,9 +39,9 @@ Callers use only the gateway at `127.0.0.1:8080`. The other ports are internal.
 | Supervisor | 8090 | Probe, restart, publish the current leader, and scale workers |
 | Workers | 8401 and up | 1 to 3. The port serves only probes and metrics; fulfillment talks to the leader store |
 
-## Five languages
+## Six languages
 
-The same design is implemented five times, so the repository can be read as a language comparison. Python is the original. Rust, Java, C++, and Go repeat the same processes, ports, errors, and acceptance tests.
+The same design is implemented six times, so the repository can be read as a language comparison. Python is the original. Rust, Java, C++, Go, and TypeScript repeat the same processes, ports, errors, and acceptance tests.
 
 | | Code | Start | Tests |
 | --- | --- | --- | --- |
@@ -50,5 +50,6 @@ The same design is implemented five times, so the repository can be read as a la
 | Java | `java/src/orange/` | `java/build.sh --root .` | `java/build.sh test` |
 | C++ | `cpp/src/` | `cpp/build.sh --root .` | `cpp/build.sh test` |
 | Go | `go/` | `go/run.sh --root .` | `go/run.sh test` |
+| TypeScript | `ts/src/` | `ts/run.sh --root .` | `ts/run.sh test` |
 
-All five stacks listen on the same ports. Run one at a time. The file-by-file maps are in [python/README.en.md](python/README.en.md), [rust/README.en.md](rust/README.en.md), [java/README.en.md](java/README.en.md), [cpp/README.en.md](cpp/README.en.md), and [go/README.en.md](go/README.en.md). Chinese copies sit beside them as `README.md`.
+All six stacks listen on the same ports. Run one at a time. The file-by-file maps are in [python/README.en.md](python/README.en.md), [rust/README.en.md](rust/README.en.md), [java/README.en.md](java/README.en.md), [cpp/README.en.md](cpp/README.en.md), [go/README.en.md](go/README.en.md), and [ts/README.en.md](ts/README.en.md). Chinese copies sit beside them as `README.md`.
