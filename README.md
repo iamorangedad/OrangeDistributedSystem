@@ -1,5 +1,11 @@
 # OrangeOrder
 
+<div align="center">
+  <img src="docs/logo.svg" alt="OrangeOrder" width="128">
+  <br>
+  <a href="README.zh.md">中文文档</a>
+</div>
+
 OrangeOrder is a single-machine, multi-process order system for learning resilience and elasticity in distributed systems, and for giving another project a stable place to submit orders.
 
 Current status: **design 0.1 is implemented.** The caller owns the catalog, prices, and cart. This system accepts the order, stores it, degrades when recommendation is unavailable, fulfills asynchronously, and fails over between a leader and a follower.
@@ -22,7 +28,6 @@ Current status: **design 0.1 is implemented.** The caller owns the catalog, pric
 | [ADR 0004 Stack](docs/adr/0004-stdlib-sqlite.md) | Six implementations, each with its own sqlite |
 | [ADR 0005 Integration](docs/adr/0005-sync-poll-integration.md) | Synchronous submit, poll for fulfillment, optional callback |
 | [Interview walkthrough](docs/interview.md) | How to use this system to answer “design a distributed system” |
-| [中文版 README](README.zh.md) | 本页的中文说明。设计文档的中文版在 `docs/zh` |
 
 The Chinese copies are in [`docs/zh`](docs/zh/overview.md). Integrators start with the [integration guide](docs/integration.md) and [OpenAPI](docs/openapi.yaml). Implementation follows the parameter table in the [technical design](docs/technical-design.md).
 
