@@ -1,6 +1,6 @@
 # Integration guide
 
-Chinese: [集成指南](../integration.md).
+Chinese: [集成指南](zh/integration.md).
 
 | Item | Value |
 | --- | --- |

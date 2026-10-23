@@ -1,6 +1,6 @@
 # ADR 0002：用任务表充当队列
 
-英文版：[English](../en/adr/0002-job-table.md)。
+英文版：[English](../../adr/0002-job-table.md)。
 
 - 状态：已接受
 - 日期：2026-10-10

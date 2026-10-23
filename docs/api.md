@@ -1,6 +1,6 @@
 # API
 
-Chinese: [接口说明](../api.md).
+Chinese: [接口说明](zh/api.md).
 
 | Item | Value |
 | --- | --- |

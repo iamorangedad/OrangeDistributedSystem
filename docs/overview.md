@@ -1,6 +1,6 @@
 # Overview
 
-Chinese: [系统概述](../overview.md).
+Chinese: [系统概述](zh/overview.md).
 
 | Item | Value |
 | --- | --- |

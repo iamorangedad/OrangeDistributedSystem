@@ -1,6 +1,6 @@
 # 面试讲解：如何设计一个分布式系统
 
-英文版：[Interview walkthrough](en/interview.md)。
+英文版：[Interview walkthrough](../interview.md)。
 
 | 项 | 值 |
 | --- | --- |

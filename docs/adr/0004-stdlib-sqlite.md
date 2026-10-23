@@ -1,6 +1,6 @@
 # ADR 0004: Six implementations and sqlite
 
-Chinese: [中文](../../adr/0004-stdlib-sqlite.md).
+Chinese: [中文](../zh/adr/0004-stdlib-sqlite.md).
 
 - Status: accepted
 - Date: 2026-10-10, extended to five languages on 2026-10-21, TypeScript added on 2026-10-23
@@ -28,7 +28,7 @@ The supervisor starts processes directly. There is no container manifest. Only o
 | Go | Subcommands of one binary, goroutines and a lock | Standard-library `net/http` | `modernc.org/sqlite`, pure Go, no cgo |
 | TypeScript | Subcommands of one Node process, the event loop | Standard-library `node:http` and `JSON` | `better-sqlite3`, compiled at install, not committed |
 
-File maps are in `python/README.en.md`, `rust/README.en.md`, `java/README.en.md`, `cpp/README.en.md`, `go/README.en.md`, and `ts/README.en.md`.
+File maps are in `python/README.md`, `rust/README.md`, `java/README.md`, `cpp/README.md`, `go/README.md`, and `ts/README.md`.
 
 ## Consequences
 

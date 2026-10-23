@@ -1,6 +1,6 @@
 # Interview walkthrough: designing a distributed system
 
-Chinese: [面试讲解](../interview.md).
+Chinese: [面试讲解](zh/interview.md).
 
 | Item | Value |
 | --- | --- |

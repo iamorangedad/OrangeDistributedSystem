@@ -1,6 +1,6 @@
 # 集成指南
 
-英文版：[Integration guide](en/integration.md)。
+英文版：[Integration guide](../integration.md)。
 
 | 项 | 值 |
 | --- | --- |

@@ -1,6 +1,6 @@
 # Technical design
 
-Chinese: [技术方案](../technical-design.md).
+Chinese: [技术方案](zh/technical-design.md).
 
 | Item | Value |
 | --- | --- |

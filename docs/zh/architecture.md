@@ -1,6 +1,6 @@
 # 架构设计
 
-英文版：[Architecture](en/architecture.md)。
+英文版：[Architecture](../architecture.md)。
 
 | 项 | 值 |
 | --- | --- |
@@ -27,7 +27,7 @@ flowchart LR
 
 ## 进程架构
 
-![OrangeOrder 进程架构](diagrams/process-topology.svg)
+![OrangeOrder 进程架构](../diagrams/process-topology.svg)
 
 写路径是：调用方 → 网关 → 一个就绪的订单进程 → 主存储。主存储在同一次提交里写下订单和履约任务，fsync 之后才向订单进程确认。从存储随后复制这条日志。
 

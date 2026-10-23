@@ -1,6 +1,6 @@
 # Architecture
 
-Chinese: [架构设计](../architecture.md).
+Chinese: [架构设计](zh/architecture.md).
 
 | Item | Value |
 | --- | --- |
@@ -27,7 +27,7 @@ flowchart LR
 
 ## Process architecture
 
-![OrangeOrder process architecture](../diagrams/process-topology.svg)
+![OrangeOrder process architecture](diagrams/process-topology.svg)
 
 The write path is caller → gateway → one ready order process → leader store. The leader writes the order and the fulfillment job in one commit, and confirms to the order process only after fsync. The follower then replicates that log.
 

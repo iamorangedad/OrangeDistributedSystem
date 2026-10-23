@@ -1,6 +1,6 @@
 # ADR 0005: Synchronous submit and polling; the fulfillment URL is optional
 
-Chinese: [中文](../../adr/0005-sync-poll-integration.md).
+Chinese: [中文](../zh/adr/0005-sync-poll-integration.md).
 
 - Status: accepted
 - Date: 2026-10-10

@@ -1,6 +1,6 @@
 # 技术方案
 
-英文版：[Technical design](en/technical-design.md)。
+英文版：[Technical design](../technical-design.md)。
 
 | 项 | 值 |
 | --- | --- |

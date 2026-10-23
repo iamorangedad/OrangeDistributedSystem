@@ -1,6 +1,6 @@
 # Data model
 
-Chinese: [数据模型](../data-model.md).
+Chinese: [数据模型](zh/data-model.md).
 
 | Item | Value |
 | --- | --- |

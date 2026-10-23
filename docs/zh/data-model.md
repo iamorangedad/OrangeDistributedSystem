@@ -1,6 +1,6 @@
 # 数据模型
 
-英文版：[Data model](en/data-model.md)。
+英文版：[Data model](../data-model.md)。
 
 | 项 | 值 |
 | --- | --- |

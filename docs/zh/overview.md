@@ -1,6 +1,6 @@
 # 系统概述
 
-英文版：[Overview](en/overview.md)。
+英文版：[Overview](../overview.md)。
 
 | 项 | 值 |
 | --- | --- |

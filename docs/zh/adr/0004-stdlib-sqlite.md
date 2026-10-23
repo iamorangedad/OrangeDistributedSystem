@@ -1,6 +1,6 @@
 # ADR 0004：六种实现与 sqlite
 
-英文版：[English](../en/adr/0004-stdlib-sqlite.md)。
+英文版：[English](../../adr/0004-stdlib-sqlite.md)。
 
 - 状态：已接受
 - 日期：2026-10-10，2026-10-21 扩到五种语言，2026-10-23 加上 TypeScript
@@ -28,7 +28,7 @@
 | Go | 一个二进制的子命令，goroutine 加锁 | 标准库 `net/http` | `modernc.org/sqlite`，纯 Go，不使用 cgo |
 | TypeScript | 一个 Node 进程的子命令，事件循环 | 标准库 `node:http`，`JSON` | `better-sqlite3`，安装时编译，不进版本库 |
 
-文件对照写在 `python/README.md`、`rust/README.md`、`java/README.md`、`cpp/README.md`、`go/README.md` 和 `ts/README.md`。
+文件对照写在 `python/README.zh.md`、`rust/README.zh.md`、`java/README.zh.md`、`cpp/README.zh.md`、`go/README.zh.md` 和 `ts/README.zh.md`。
 
 ## 后果
 

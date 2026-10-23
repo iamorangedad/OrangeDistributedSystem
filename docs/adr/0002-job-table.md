@@ -1,6 +1,6 @@
 # ADR 0002: The job table is the queue
 
-Chinese: [中文](../../adr/0002-job-table.md).
+Chinese: [中文](../zh/adr/0002-job-table.md).
 
 - Status: accepted
 - Date: 2026-10-10

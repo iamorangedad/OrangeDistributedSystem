@@ -1,6 +1,6 @@
 # ADR 0003: The supervisor is the election witness
 
-Chinese: [中文](../../adr/0003-supervisor-witness.md).
+Chinese: [中文](../zh/adr/0003-supervisor-witness.md).
 
 - Status: accepted
 - Date: 2026-10-10

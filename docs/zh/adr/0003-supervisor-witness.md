@@ -1,6 +1,6 @@
 # ADR 0003：监督者担任选主见证人
 
-英文版：[English](../en/adr/0003-supervisor-witness.md)。
+英文版：[English](../../adr/0003-supervisor-witness.md)。
 
 - 状态：已接受
 - 日期：2026-10-10

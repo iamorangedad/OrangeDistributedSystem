@@ -1,6 +1,6 @@
 # 需求与变更记录
 
-英文版：[Requirements history](en/requirements-history.md)。
+英文版：[Requirements history](../requirements-history.md)。
 
 | 项 | 值 |
 | --- | --- |
@@ -175,4 +175,4 @@ Elastic System Review 最初只放在对话旁的画布里，没有进入仓库�
 
 | 编号 | 相对 CHG-4 | 变更后的需求 | 落在哪 |
 | --- | --- | --- | --- |
-| R5-1 | 实现约定停在 Python、Rust、Java、C++、Go | 加上 TypeScript（Node）。一次只跑一种，因为端口相同 | [ADR 0004](adr/0004-stdlib-sqlite.md)、`ts/README.md` |
+| R5-1 | 实现约定停在 Python、Rust、Java、C++、Go | 加上 TypeScript（Node）。一次只跑一种，因为端口相同 | [ADR 0004](adr/0004-stdlib-sqlite.md)、`ts/README.zh.md` |

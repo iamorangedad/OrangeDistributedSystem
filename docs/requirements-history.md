@@ -1,6 +1,6 @@
 # Requirements history
 
-Chinese: [需求与变更记录](../requirements-history.md).
+Chinese: [需求与变更记录](zh/requirements-history.md).
 
 | Item | Value |
 | --- | --- |
@@ -175,4 +175,4 @@ This change does not alter ports, errors, logs, parameters, or AC-1 through AC-1
 
 | Id | Relative to CHG-4 | Requirement after the change | Where it landed |
 | --- | --- | --- | --- |
-| R5-1 | The implementation agreement stopped at Python, Rust, Java, C++, and Go | Add TypeScript on Node. Run one language at a time, because the ports are the same | [ADR 0004](adr/0004-stdlib-sqlite.md), `ts/README.en.md` |
+| R5-1 | The implementation agreement stopped at Python, Rust, Java, C++, and Go | Add TypeScript on Node. Run one language at a time, because the ports are the same | [ADR 0004](adr/0004-stdlib-sqlite.md), `ts/README.md` |

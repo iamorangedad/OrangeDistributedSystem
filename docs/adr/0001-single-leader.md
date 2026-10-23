@@ -1,6 +1,6 @@
 # ADR 0001: Single leader, fenced by epoch
 
-Chinese: [中文](../../adr/0001-single-leader.md).
+Chinese: [中文](../zh/adr/0001-single-leader.md).
 
 - Status: accepted
 - Date: 2026-10-10
