@@ -28,7 +28,7 @@ The supervisor starts processes directly. There is no container manifest. Only o
 | Go | Subcommands of one binary, goroutines and a lock | Standard-library `net/http` | `modernc.org/sqlite`, pure Go, no cgo |
 | TypeScript | Subcommands of one Node process, the event loop | Standard-library `node:http` and `JSON` | `better-sqlite3`, compiled at install, not committed |
 
-File maps are in `python/README.md`, `rust/README.md`, `java/README.md`, `cpp/README.md`, `go/README.md`, and `ts/README.md`.
+The file map is on the [homepage](../../README.md).
 
 ## Consequences
 
