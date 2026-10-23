@@ -1,0 +1,13 @@
+{
+  "name": "orange",
+  "private": true,
+  "description": "OrangeOrder, TypeScript implementation on Node.js",
+  "dependencies": {
+    "better-sqlite3": "11.6.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "7.6.12",
+    "@types/node": "20.17.10",
+    "typescript": "5.6.3"
+  }
+}

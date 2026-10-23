@@ -1,9 +1,9 @@
-# ADR 0004: Five implementations and sqlite
+# ADR 0004: Six implementations and sqlite
 
 Chinese: [中文](../../adr/0004-stdlib-sqlite.md).
 
 - Status: accepted
-- Date: 2026-10-10, extended to five languages on 2026-10-21
+- Date: 2026-10-10, extended to five languages on 2026-10-21, TypeScript added on 2026-10-23
 
 ## Context
 
@@ -15,9 +15,9 @@ The same behavior is later read across languages. The external contract must not
 
 ## Decision
 
-Five implementations share the same ports, errors, logs, and acceptance tests. Each store node has one sqlite file, accessed with SQL by that process. Replication pushes `replication_log` at the application layer. It does not copy the database file and does not use a sqlite cluster mode.
+Six implementations share the same ports, errors, logs, and acceptance tests. Each store node has one sqlite file, accessed with SQL by that process. Replication pushes `replication_log` at the application layer. It does not copy the database file and does not use a sqlite cluster mode.
 
-The supervisor starts processes directly. There is no container manifest. Only one language runs at a time, because all five bind the same ports.
+The supervisor starts processes directly. There is no container manifest. Only one language runs at a time, because all six bind the same ports.
 
 | Language | How a process runs | HTTP and JSON | sqlite |
 | --- | --- | --- | --- |
@@ -26,8 +26,9 @@ The supervisor starts processes directly. There is no container manifest. Only o
 | Java | Subcommands of the same `orange.Main` | JDK `HttpServer`, hand-written `Json` | `sqlite-jdbc`, downloaded by the build, not committed |
 | C++ | Subcommands of one binary, one thread per connection | POSIX sockets, hand-written JSON | System `libsqlite3.so.0`; the header is downloaded by the build |
 | Go | Subcommands of one binary, goroutines and a lock | Standard-library `net/http` | `modernc.org/sqlite`, pure Go, no cgo |
+| TypeScript | Subcommands of one Node process, the event loop | Standard-library `node:http` and `JSON` | `better-sqlite3`, compiled at install, not committed |
 
-File maps are in `python/README.en.md`, `rust/README.en.md`, `java/README.en.md`, `cpp/README.en.md`, and `go/README.en.md`.
+File maps are in `python/README.en.md`, `rust/README.en.md`, `java/README.en.md`, `cpp/README.en.md`, `go/README.en.md`, and `ts/README.en.md`.
 
 ## Consequences
 

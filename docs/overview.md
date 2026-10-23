@@ -52,7 +52,7 @@ OrangeOrder 负责：
 ## 约束
 
 - 部署在一台机器上，进程由监督者拉起。
-- 五种实现服从同一份契约：端口、错误、日志和验收。每个存储节点一个 sqlite 文件。语言差异见 [ADR 0004](adr/0004-stdlib-sqlite.md)。
+- 六种实现服从同一份契约：端口、错误、日志和验收。每个存储节点一个 sqlite 文件。语言差异见 [ADR 0004](adr/0004-stdlib-sqlite.md)。
 - 写入者始终只有当前 epoch 的主存储。见 [ADR 0001](adr/0001-single-leader.md)。
 - 订单副本数固定为 2。弹性只加在工人上，用来消化履约积压。
 - 对外集成使用同步 HTTP 加轮询。第一版不提供 webhook。见 [ADR 0005](adr/0005-sync-poll-integration.md)。

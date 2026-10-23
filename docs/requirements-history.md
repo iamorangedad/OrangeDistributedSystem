@@ -166,3 +166,13 @@ Elastic System Review 最初只放在对话旁的画布里，没有进入仓库�
 | 编号 | 相对 CHG-3 | 变更后的需求 | 落在哪 |
 | --- | --- | --- | --- |
 | R4-1 | 对外名称是 Orange，仓库名是 OrangeDistributedSystem | 项目名为 OrangeOrder。文档、接口标题和示意图使用这个名字 | 首页、设计文档、OpenAPI |
+
+## 变更 CHG-5：加上 TypeScript 实现
+
+日期：2026-10-23。触发原因：现有五种语言都能在一次调用里阻塞等待，缺一个事件循环运行时来对照截止时间和并行推荐。
+
+这次变更不改端口、错误、日志、参数和 AC-1 到 AC-12。TypeScript 进程由监督者直接拉起。存储事务仍是同步的 sqlite；推荐和故障文件轮询走 Node 的事件循环。
+
+| 编号 | 相对 CHG-4 | 变更后的需求 | 落在哪 |
+| --- | --- | --- | --- |
+| R5-1 | 实现约定停在 Python、Rust、Java、C++、Go | 加上 TypeScript（Node）。一次只跑一种，因为端口相同 | [ADR 0004](adr/0004-stdlib-sqlite.md)、`ts/README.md` |

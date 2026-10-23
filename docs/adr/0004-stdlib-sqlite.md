@@ -1,9 +1,9 @@
-# ADR 0004：五种实现与 sqlite
+# ADR 0004：六种实现与 sqlite
 
 英文版：[English](../en/adr/0004-stdlib-sqlite.md)。
 
 - 状态：已接受
-- 日期：2026-10-10，2026-10-21 扩到五种语言
+- 日期：2026-10-10，2026-10-21 扩到五种语言，2026-10-23 加上 TypeScript
 
 ## 背景
 
@@ -15,9 +15,9 @@
 
 ## 决策
 
-五种实现服从同一份端口、错误、日志和验收。每个存储节点一个 sqlite 文件，由该进程用 SQL 访问。复制在应用层按 `replication_log` 推送，不复制数据库文件，也不使用 sqlite 的集群方案。
+六种实现服从同一份端口、错误、日志和验收。每个存储节点一个 sqlite 文件，由该进程用 SQL 访问。复制在应用层按 `replication_log` 推送，不复制数据库文件，也不使用 sqlite 的集群方案。
 
-进程由监督者直接拉起，不写容器清单。一次只启动一种语言，因为五套都绑定同一组端口。
+进程由监督者直接拉起，不写容器清单。一次只启动一种语言，因为六套都绑定同一组端口。
 
 | 语言 | 进程怎么跑 | HTTP 与 JSON | sqlite |
 | --- | --- | --- | --- |
@@ -26,8 +26,9 @@
 | Java | 同一个 `orange.Main` 的子命令 | JDK 的 `HttpServer`，手写 `Json` | `sqlite-jdbc`，构建时下载，不进版本库 |
 | C++ | 一个二进制的子命令，每个连接一个线程 | POSIX 套接字，手写 JSON | 系统的 `libsqlite3.so.0`，头文件由构建脚本下载 |
 | Go | 一个二进制的子命令，goroutine 加锁 | 标准库 `net/http` | `modernc.org/sqlite`，纯 Go，不使用 cgo |
+| TypeScript | 一个 Node 进程的子命令，事件循环 | 标准库 `node:http`，`JSON` | `better-sqlite3`，安装时编译，不进版本库 |
 
-文件对照写在 `python/README.md`、`rust/README.md`、`java/README.md`、`cpp/README.md` 和 `go/README.md`。
+文件对照写在 `python/README.md`、`rust/README.md`、`java/README.md`、`cpp/README.md`、`go/README.md` 和 `ts/README.md`。
 
 ## 后果
 

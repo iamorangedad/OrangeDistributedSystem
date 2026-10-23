@@ -8,3 +8,5 @@ java/lib/
 cpp/build/
 cpp/third_party/
 go/bin/
+ts/node_modules/
+ts/dist/

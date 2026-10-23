@@ -166,3 +166,13 @@ This change renames the project as presented to readers. Ports, errors, logs, pa
 | Id | Relative to CHG-3 | Requirement after the change | Where it landed |
 | --- | --- | --- | --- |
 | R4-1 | The public name was Orange, and the repository was OrangeDistributedSystem | The project name is OrangeOrder. Documents, the API title, and diagrams use that name | Homepage, design docs, OpenAPI |
+
+## Change CHG-5: add the TypeScript implementation
+
+Date: 2026-10-23. Trigger: the five existing languages can all block inside one call. An event-loop runtime was missing for the deadline and the parallel recommendation.
+
+This change does not alter ports, errors, logs, parameters, or AC-1 through AC-12. The supervisor starts the TypeScript processes directly. Store transactions stay synchronous sqlite. Recommendation and fault-file polling run on Node’s event loop.
+
+| Id | Relative to CHG-4 | Requirement after the change | Where it landed |
+| --- | --- | --- | --- |
+| R5-1 | The implementation agreement stopped at Python, Rust, Java, C++, and Go | Add TypeScript on Node. Run one language at a time, because the ports are the same | [ADR 0004](adr/0004-stdlib-sqlite.md), `ts/README.en.md` |

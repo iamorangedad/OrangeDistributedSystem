@@ -52,7 +52,7 @@ Version one does not include multi-region active-active, multi-leader writes, CQ
 ## Constraints
 
 - Deploy on one machine. The supervisor starts the processes.
-- Five implementations share one contract: ports, errors, logs, and acceptance tests. Each store node has one sqlite file. Language differences are in [ADR 0004](adr/0004-stdlib-sqlite.md).
+- Six implementations share one contract: ports, errors, logs, and acceptance tests. Each store node has one sqlite file. Language differences are in [ADR 0004](adr/0004-stdlib-sqlite.md).
 - The only writer is the store that holds the current epoch. See [ADR 0001](adr/0001-single-leader.md).
 - There are exactly two order replicas. Elasticity applies only to workers, to drain fulfillment backlog.
 - External integration is synchronous HTTP plus polling. Version one has no webhook. See [ADR 0005](adr/0005-sync-poll-integration.md).
