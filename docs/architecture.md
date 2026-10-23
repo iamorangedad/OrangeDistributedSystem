@@ -1,188 +1,188 @@
-# 架构设计
+# Architecture
 
-英文版：[Architecture](en/architecture.md)。
+Chinese: [架构设计](zh/architecture.md).
 
-| 项 | 值 |
+| Item | Value |
 | --- | --- |
-| 状态 | 设计 0.1 已实现 |
-| 版本 | 0.1 |
-| 日期 | 2026-10-10 |
+| Status | Design 0.1 is implemented |
+| Version | 0.1 |
+| Date | 2026-10-10 |
 
-参数和故障细则以 [技术方案](technical-design.md) 为准。本文说明结构、路径和状态。
+Parameters and fault details follow the [technical design](technical-design.md). This document describes structure, paths, and states.
 
-## 系统上下文
+## System context
 
-调用方只依赖网关。商品与价格停留在调用方。实验者通过故障文件和监督者的状态页观察系统，不走下单接口。
+The caller depends only on the gateway. Catalog and price stay with the caller. An experimenter watches the system through the fault file and the supervisor status page, not through the order API.
 
 ```mermaid
 flowchart LR
-  caller[调用方项目]
-  operator[本机实验者]
+  caller[Caller project]
+  operator[Local experimenter]
   subgraph orange [OrangeOrder]
-    gateway[网关]
+    gateway[Gateway]
   end
   caller -->|"HTTP /v1/orders"| gateway
-  operator -->|故障文件与状态页| orange
+  operator -->|Fault file and status page| orange
 ```
 
-## 进程架构
+## Process architecture
 
-![OrangeOrder 进程架构](diagrams/process-topology.svg)
+![OrangeOrder process architecture](diagrams/process-topology.svg)
 
-写路径是：调用方 → 网关 → 一个就绪的订单进程 → 主存储。主存储在同一次提交里写下订单和履约任务，fsync 之后才向订单进程确认。从存储随后复制这条日志。
+The write path is caller → gateway → one ready order process → leader store. The leader writes the order and the fulfillment job in one commit, and confirms to the order process only after fsync. The follower then replicates that log.
 
-推荐从订单进程旁路调用，失败不影响已经准备好的提交。工人不接受调用方流量，只向主存储领取任务。
+Recommendation is a side call from the order process. Its failure does not undo a commit that is already prepared. Workers do not take caller traffic. They claim jobs from the leader store.
 
-监督者连到每个进程做探活和拉起，并向订单进程公布当前主存储地址。它不参与「这次写入算不算成功」。
+The supervisor probes and restarts each process, and publishes the current leader address to the order processes. It does not decide whether this write succeeded.
 
-### 进程职责
+### Process duties
 
-| 进程 | 保存的状态 | 失败时谁接手 |
+| Process | State it keeps | Who takes over on failure |
 | --- | --- | --- |
-| 网关 | 内存中的令牌桶和在途计数 | 监督者拉起；拉起期间调用方看到连接失败 |
-| 订单 A / B | 内存中的熔断器 | 另一个副本；监督者重启故障副本 |
-| 推荐 | 无 | 订单返回降级成功 |
-| 主存储 | sqlite 中的订单、任务和复制日志 | 监督者把从存储提升为新主 |
-| 从存储 | 已应用的日志投影 | 复制暂停，主存储继续接写 |
-| 工人 | 无 | 任务在可见性超时后回到待领取 |
-| 监督者 | 当前主地址、epoch、工人名单 | 不提升新主；现任主存储继续接写 |
+| Gateway | In-memory token bucket and in-flight count | The supervisor restarts it; callers see connection failure during the restart |
+| Order A / B | In-memory circuit breaker | The other replica; the supervisor restarts the failed one |
+| Recommender | None | The order returns a degraded success |
+| Leader store | Orders, jobs, and the replication log in sqlite | The supervisor promotes the follower |
+| Follower store | The applied log projection | Replication pauses; the leader keeps accepting writes |
+| Worker | None | The job returns to pending after the visibility timeout |
+| Supervisor | Current leader address, epoch, worker list | No promotion; the current leader keeps accepting writes |
 
-订单进程是无状态的：业务记录不在它的内存或本地磁盘里。熔断计数可以丢，重启后重新累计。
+An order process is stateless: business records are not in its memory or on its local disk. Breaker counts may be lost and start again after a restart.
 
-## 订单进程内部
+## Inside an order process
 
 ```mermaid
 flowchart TB
-  req[带截止时间的请求]
-  idem[按调用方和幂等键查找]
-  parallel[并行]
-  store[写主存储]
-  reco[调用推荐 最多 80ms]
-  snap[把推荐写进响应快照]
+  req[Request with a deadline]
+  idem[Look up by caller and idempotency key]
+  parallel[In parallel]
+  store[Write the leader store]
+  reco[Call recommendation, at most 80ms]
+  snap[Write the recommendation into the response snapshot]
   req --> idem
-  idem -->|首次| parallel
-  idem -->|命中且正文相同| snap
+  idem -->|First time| parallel
+  idem -->|Hit and same body| snap
   parallel --> store
   parallel --> reco
   store --> snap
   reco --> snap
 ```
 
-存储确认和推荐等待并行发生。存储失败则整单失败，推荐结果丢弃。存储成功而推荐未在 80ms 内返回，则 `degraded=true`，`recommendation` 为空。幂等重放直接返回第一次的快照，不再写存储，也不再问推荐。
+Store confirmation and the recommendation wait happen in parallel. If the store fails, the whole order fails and the recommendation is discarded. If the store succeeds and recommendation does not return within 80ms, `degraded=true` and `recommendation` is empty. An idempotent replay returns the first snapshot directly, without another store write and without another recommendation call.
 
-## 下单时序
+## Order sequence
 
 ```mermaid
 sequenceDiagram
-  participant C as 调用方
-  participant G as 网关
-  participant O as 订单
-  participant S as 主存储
-  participant R as 推荐
+  participant C as Caller
+  participant G as Gateway
+  participant O as Order
+  participant S as Leader store
+  participant R as Recommender
   C->>G: POST /v1/orders
-  G->>G: 令牌桶，写入截止时间
-  G->>O: 转发到一个就绪副本
-  par 确认写入
-    O->>S: 同一事务追加订单和任务
-    S-->>O: epoch 与 log_index
-  and 推荐
-    O->>R: 最多等待 80ms
-    R-->>O: 推荐或超时
+  G->>G: Token bucket, write the deadline
+  G->>O: Forward to one ready replica
+  par Confirm the write
+    O->>S: Append order and job in one transaction
+    S-->>O: epoch and log_index
+  and Recommendation
+    O->>R: Wait at most 80ms
+    R-->>O: Recommendation or timeout
   end
-  O-->>G: 201 与响应快照
+  O-->>G: 201 and the response snapshot
   G-->>C: 201
 ```
 
-网关在转发前为请求设定绝对截止时间，默认现在起 800ms。订单进程把剩余时间再封顶为 400ms 交给主存储。超过截止时间后，订单进程不再发起新的下游调用。
+Before forwarding, the gateway sets an absolute deadline, 800ms from now by default. The order process caps the remaining time at 400ms for the leader store. After the deadline, the order process starts no new downstream calls.
 
-## 履约时序
+## Fulfillment sequence
 
-履约不在下单的响应里完成。调用方之后用 GET 看 `fulfillment.status`。
+Fulfillment does not finish inside the order response. The caller later GETs `fulfillment.status`.
 
 ```mermaid
 sequenceDiagram
-  participant W as 工人
-  participant S as 主存储
-  participant C as 调用方履约地址
-  W->>S: 领取可见的任务
-  S-->>W: 任务进入 inflight
-  alt 订单带有 fulfill_url
-    W->>C: POST 履约事件
-    C-->>W: 2xx 或可重试错误
-  else 没有履约地址
-    W->>W: 本地完成
+  participant W as Worker
+  participant S as Leader store
+  participant C as Caller fulfillment URL
+  W->>S: Claim a visible job
+  S-->>W: Job becomes inflight
+  alt Order has fulfill_url
+    W->>C: POST fulfillment event
+    C-->>W: 2xx or a retryable error
+  else No fulfillment URL
+    W->>W: Complete locally
   end
-  W->>S: ack 或 fail
-  S->>S: 成功则订单变为 fulfilled
+  W->>S: ack or fail
+  S->>S: On success the order becomes fulfilled
 ```
 
-`fulfill_url` 只允许指向 `127.0.0.1` 的 HTTP 地址。调用方要按 `order_id` 幂等处理这次 POST，因为超时重试会再次送到。
+`fulfill_url` may point only at an HTTP address on `127.0.0.1`. The caller must handle this POST idempotently by `order_id`, because a timeout retry sends it again.
 
-## 主存储切换
+## Leader switch
 
 ```mermaid
 sequenceDiagram
-  participant Sup as 监督者
-  participant Old as 旧主存储
-  participant New as 从存储
-  participant O as 订单
-  Note over Old: 心跳中断超过 1 秒
-  Sup->>New: 提升为 epoch+1
-  New->>New: fsync 新 epoch
-  New-->>Sup: 可以接写
-  Sup->>O: 公布新的主存储地址
-  Old-->>O: 旧 epoch 的写入被拒绝
-  O->>New: 用同一幂等键重试
+  participant Sup as Supervisor
+  participant Old as Old leader
+  participant New as Follower
+  participant O as Order
+  Note over Old: Heartbeat missing for more than 1 second
+  Sup->>New: Promote to epoch+1
+  New->>New: fsync the new epoch
+  New-->>Sup: Ready to accept writes
+  Sup->>O: Publish the new leader address
+  Old-->>O: Writes from the old epoch are rejected
+  O->>New: Retry with the same idempotency key
 ```
 
-从存储成为主存储时，只拥有它已经应用的日志。旧主上尚未复制的提交会留在旧文件里，不会自动合并。这是第一版明确接受的丢失窗口，见 [ADR 0001](adr/0001-single-leader.md)。
+When the follower becomes leader, it has only the log it has already applied. Commits on the old leader that were not replicated stay in the old file and are not merged. Version one accepts that loss window. See [ADR 0001](adr/0001-single-leader.md).
 
-监督者进程自己不可用时，没有人提升新主。现任主存储继续服务。
+If the supervisor process itself is unavailable, nobody promotes a new leader. The current leader keeps serving.
 
-## 状态机
+## State machines
 
-订单状态由任务状态推动，调用方只看订单上的 `state` 和 `fulfillment`。
+Order state is driven by job state. The caller looks only at `state` and `fulfillment` on the order.
 
 ```mermaid
 stateDiagram-v2
-  [*] --> accepted: 主存储确认
-  accepted --> fulfilled: 任务完成
-  accepted --> fulfillment_failed: 任务进入死信
+  [*] --> accepted: Leader confirms
+  accepted --> fulfilled: Job completes
+  accepted --> fulfillment_failed: Job becomes a dead letter
 ```
 
 ```mermaid
 stateDiagram-v2
-  [*] --> pending: 与订单同一事务
-  pending --> inflight: 工人领取
-  inflight --> pending: 可见性超时或可重试失败
+  [*] --> pending: Same transaction as the order
+  pending --> inflight: Worker claims
+  inflight --> pending: Visibility timeout or retryable failure
   inflight --> done: ack
-  inflight --> dead: 尝试次数达到上限
+  inflight --> dead: Attempt limit reached
 ```
 
-推荐熔断器在每个订单进程里单独计数：
+The recommendation breaker counts separately inside each order process:
 
 ```mermaid
 stateDiagram-v2
   [*] --> closed
-  closed --> open: 10 秒内失败满 5 次
-  open --> half_open: 打开满 5 秒
-  half_open --> closed: 探测成功
-  half_open --> open: 探测失败
+  closed --> open: 5 failures within 10 seconds
+  open --> half_open: Open for 5 seconds
+  half_open --> closed: Probe succeeds
+  half_open --> open: Probe fails
 ```
 
-打开期间，订单进程不再连接推荐，直接降级。
+While it is open, the order process does not connect to recommendation and degrades directly.
 
-## 部署
+## Deployment
 
-全部进程在同一台机器、同一个工作目录中。
+Every process is on the same machine and in the same working directory.
 
 ```text
 OrangeOrder/
-  python/  rust/  java/  cpp/  go/  ts/   六种实现，一次只跑一种
-  runtime/faults.json                 故障开关
-  runtime/data/                       两个 sqlite 文件，由存储进程自己创建
+  python/  rust/  java/  cpp/  go/  ts/   six implementations; run one
+  runtime/faults.json                 fault switches
+  runtime/data/                       two sqlite files, created by the store processes
 ```
 
-监督者按固定名单启动网关、两个订单进程、推荐、主存储、从存储和一个工人。工人增加时占用 8402、8403，只提供探针和指标。主存储或从存储的 sqlite 文件由该进程自己创建。复制走应用层日志，不复制数据库文件。
+The supervisor starts a fixed list: gateway, two order processes, recommender, leader store, follower store, and one worker. Extra workers use 8402 and 8403 and serve only probes and metrics. Each store process creates its own sqlite file. Replication is the application log, not a copy of the database file.
 
-端口与数据路径见 [技术方案](technical-design.md)。对外只有 8080 是集成使用的端口。
+Ports and data paths are in the [technical design](technical-design.md). Only 8080 is the integration port.

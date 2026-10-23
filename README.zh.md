@@ -1,5 +1,7 @@
 # OrangeOrder 下单系统
 
+[English](README.md)
+
 OrangeOrder 是一个跑在单机上的多进程下单系统，用来学习分布式里的容错和伸缩，并给另一个项目提供稳定的下单入口。
 
 当前状态：**设计 0.1 已实现。** 调用方拥有商品、价格和购物车；本系统负责接单、保存、降级、异步履约和主从切换。
@@ -8,22 +10,22 @@ OrangeOrder 是一个跑在单机上的多进程下单系统，用来学习分�
 
 | 文档 | 内容 |
 | --- | --- |
-| [需求与变更记录](docs/requirements-history.md) | 原始弹性表、评审结论，以及之后的需求变更 |
-| [系统概述](docs/overview.md) | 背景、目标、边界、术语 |
-| [架构设计](docs/architecture.md) | 上下文、进程图、时序、状态机 |
-| [技术方案](docs/technical-design.md) | 选型、写入规则、复制、伸缩、参数、验收 |
-| [接口说明](docs/api.md) | 对外语义与进程间接口 |
-| [OpenAPI](docs/openapi.yaml) | 机器可读的对外契约 |
-| [数据模型](docs/data-model.md) | 表、日志、状态 |
-| [集成指南](docs/integration.md) | 另一个项目如何接入 |
-| [ADR 0001 单主](docs/adr/0001-single-leader.md) | 异步复制，用 epoch 隔离旧主 |
-| [ADR 0002 任务表](docs/adr/0002-job-table.md) | 用任务表充当队列 |
-| [ADR 0003 见证人](docs/adr/0003-supervisor-witness.md) | 只有监督者能提升主存储 |
-| [ADR 0004 技术栈](docs/adr/0004-stdlib-sqlite.md) | 六种实现与 sqlite |
-| [ADR 0005 集成方式](docs/adr/0005-sync-poll-integration.md) | 同步下单、轮询履约、可选回调 |
-| [面试讲解](docs/interview.md) | 用本系统回答「如何设计一个分布式系统」 |
+| [需求与变更记录](docs/zh/requirements-history.md) | 原始弹性表、评审结论，以及之后的需求变更 |
+| [系统概述](docs/zh/overview.md) | 背景、目标、边界、术语 |
+| [架构设计](docs/zh/architecture.md) | 上下文、进程图、时序、状态机 |
+| [技术方案](docs/zh/technical-design.md) | 选型、写入规则、复制、伸缩、参数、验收 |
+| [接口说明](docs/zh/api.md) | 对外语义与进程间接口 |
+| [OpenAPI](docs/zh/openapi.yaml) | 机器可读的对外契约 |
+| [数据模型](docs/zh/data-model.md) | 表、日志、状态 |
+| [集成指南](docs/zh/integration.md) | 另一个项目如何接入 |
+| [ADR 0001 单主](docs/zh/adr/0001-single-leader.md) | 异步复制，用 epoch 隔离旧主 |
+| [ADR 0002 任务表](docs/zh/adr/0002-job-table.md) | 用任务表充当队列 |
+| [ADR 0003 见证人](docs/zh/adr/0003-supervisor-witness.md) | 只有监督者能提升主存储 |
+| [ADR 0004 技术栈](docs/zh/adr/0004-stdlib-sqlite.md) | 六种实现与 sqlite |
+| [ADR 0005 集成方式](docs/zh/adr/0005-sync-poll-integration.md) | 同步下单、轮询履约、可选回调 |
+| [面试讲解](docs/zh/interview.md) | 用本系统回答「如何设计一个分布式系统」 |
 
-英文设计文档在 [docs/en](docs/en/overview.md)。集成方读 [集成指南](docs/integration.md) 和 [OpenAPI](docs/openapi.yaml) 即可开始对接。实现时以 [技术方案](docs/technical-design.md) 里的参数表为准。
+英文设计文档在 [docs](docs/overview.md)。集成方读 [集成指南](docs/zh/integration.md) 和 [OpenAPI](docs/zh/openapi.yaml) 即可开始对接。实现时以 [技术方案](docs/zh/technical-design.md) 里的参数表为准。
 
 ## 进程一览
 
@@ -51,4 +53,4 @@ OrangeOrder 是一个跑在单机上的多进程下单系统，用来学习分�
 | Go | `go/` | `go/run.sh --root .` | `go/run.sh test` |
 | TypeScript | `ts/src/` | `ts/run.sh --root .` | `ts/run.sh test` |
 
-六套实现占用同一组端口，一次只跑一套。文件对照表在 [python/README.md](python/README.md)、[rust/README.md](rust/README.md)、[java/README.md](java/README.md)、[cpp/README.md](cpp/README.md)、[go/README.md](go/README.md) 和 [ts/README.md](ts/README.md)。各目录里的 `README.en.md` 是对应英文说明。
+六套实现占用同一组端口，一次只跑一套。文件对照表在 [python/README.zh.md](python/README.zh.md)、[rust/README.zh.md](rust/README.zh.md)、[java/README.zh.md](java/README.zh.md)、[cpp/README.zh.md](cpp/README.zh.md)、[go/README.zh.md](go/README.zh.md) 和 [ts/README.zh.md](ts/README.zh.md)。各目录里的 `README.md` 是对应英文说明。

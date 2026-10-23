@@ -3,17 +3,17 @@ info:
   title: OrangeOrder API
   version: 0.1.0
   description: |
-    单机下单系统的对外接口。调用方只访问网关。
-    成功创建与幂等重放都返回 201。degraded 为 true 时订单仍然有效。
-    内部端口、复制和故障转移不属于本契约。
+    External API of the single-machine order system. Callers use only the gateway.
+    A successful create and an idempotent replay both return 201. When degraded is true the order is still valid.
+    Internal ports, replication, and failover are outside this contract.
 servers:
   - url: http://127.0.0.1:8080
-    description: 本机网关
+    description: Local gateway
 paths:
   /v1/orders:
     post:
       operationId: createOrder
-      summary: 创建订单或重放已有订单
+      summary: Create an order or replay an existing one
       parameters:
         - $ref: "#/components/parameters/CallerId"
         - $ref: "#/components/parameters/IdempotencyKey"
@@ -31,7 +31,7 @@ paths:
               fulfill_url: http://127.0.0.1:9000/hooks/orange-fulfill
       responses:
         "201":
-          description: 已接受，或钥匙对应的订单已存在且正文相同
+          description: Accepted, or the key already has an order with the same body
           headers:
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
@@ -51,7 +51,7 @@ paths:
           $ref: "#/components/responses/Error"
     get:
       operationId: getOrderByIdempotencyKey
-      summary: 用幂等键找回订单
+      summary: Find an order by idempotency key
       parameters:
         - $ref: "#/components/parameters/CallerId"
         - $ref: "#/components/parameters/RequestId"
@@ -64,7 +64,7 @@ paths:
             maxLength: 128
       responses:
         "200":
-          description: 找到订单的当前快照
+          description: Current snapshot of the order
           headers:
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
@@ -79,7 +79,7 @@ paths:
   /v1/orders/{order_id}:
     get:
       operationId: getOrder
-      summary: 按订单号读取当前快照
+      summary: Read the current snapshot by order id
       parameters:
         - $ref: "#/components/parameters/CallerId"
         - $ref: "#/components/parameters/RequestId"
@@ -90,7 +90,7 @@ paths:
             type: string
       responses:
         "200":
-          description: 当前快照，履约状态可能已经前进
+          description: Current snapshot; fulfillment may have advanced
           headers:
             X-Request-Id:
               $ref: "#/components/headers/RequestId"
@@ -103,19 +103,19 @@ paths:
   /health:
     get:
       operationId: health
-      summary: 存活探针
+      summary: Liveness probe
       responses:
         "200":
-          description: 进程能处理 HTTP
+          description: The process can handle HTTP
   /ready:
     get:
       operationId: ready
-      summary: 就绪探针
+      summary: Readiness probe
       responses:
         "200":
-          description: 网关至少有一个订单副本可写
+          description: The gateway has at least one writable order replica
         "503":
-          description: 没有可写副本，或主存储正在切换
+          description: No writable replica, or the leader store is switching
 components:
   parameters:
     CallerId:
@@ -148,11 +148,11 @@ components:
       schema:
         type: integer
         minimum: 0
-      description: 秒
+      description: Seconds
       required: true
   responses:
     Error:
-      description: 请求失败
+      description: The request failed
       headers:
         X-Request-Id:
           $ref: "#/components/headers/RequestId"
@@ -161,7 +161,7 @@ components:
           schema:
             $ref: "#/components/schemas/ErrorEnvelope"
     RateLimited:
-      description: 令牌用尽、在途已满，或待处理任务达到上限
+      description: Tokens are exhausted, in-flight is full, or pending jobs hit the cap
       headers:
         X-Request-Id:
           $ref: "#/components/headers/RequestId"
@@ -190,7 +190,7 @@ components:
           maxLength: 128
         fulfill_url:
           type: string
-          description: 仅允许 http://127.0.0.1 的地址，且不能包含用户信息
+          description: Only an http://127.0.0.1 address, with no user info
     Fulfillment:
       type: object
       required: [status, attempts, last_error]

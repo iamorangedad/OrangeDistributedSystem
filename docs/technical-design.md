@@ -1,169 +1,169 @@
-# 技术方案
+# Technical design
 
-英文版：[Technical design](en/technical-design.md)。
+Chinese: [技术方案](zh/technical-design.md).
 
-| 项 | 值 |
+| Item | Value |
 | --- | --- |
-| 状态 | 设计 0.1 已实现 |
-| 版本 | 0.1 |
-| 日期 | 2026-10-10 |
+| Status | Design 0.1 is implemented |
+| Version | 0.1 |
+| Date | 2026-10-10 |
 
-本文是实现时的依据。结构图和状态机在 [架构设计](architecture.md)，表结构在 [数据模型](data-model.md)，对外语义在 [接口说明](api.md)。
+This document is the source for implementation. Structure and state machines are in the [architecture](architecture.md). Tables are in the [data model](data-model.md). External semantics are in the [API](api.md).
 
-## 技术选型
+## Choices
 
-| 选择 | 决定 |
+| Choice | Decision |
 | --- | --- |
-| 语言与运行时 | 六种实现服从本表。语言差异见 [ADR 0004](adr/0004-stdlib-sqlite.md)，不进入对外契约 |
-| 持久化 | 每个存储节点一个 sqlite 文件，`PRAGMA synchronous=FULL` |
-| 进程模型 | 监督者拉起独立进程，只监听 `127.0.0.1` |
-| 队列 | 主存储里的任务表，不部署消息中间件 |
-| 服务发现 | 监督者公布主存储地址；订单副本地址固定 |
-| 观测 | 每进程 JSON 行日志，加上文末列出的计数 |
-| 故障注入 | `runtime/faults.json`，进程定期读取 |
+| Language and runtime | Six implementations follow this table. Language differences are in [ADR 0004](adr/0004-stdlib-sqlite.md) and do not enter the external contract |
+| Persistence | One sqlite file per store node, `PRAGMA synchronous=FULL` |
+| Process model | The supervisor starts independent processes. They listen only on `127.0.0.1` |
+| Queue | The job table on the leader store. No message broker is deployed |
+| Discovery | The supervisor publishes the leader address. Order replica addresses are fixed |
+| Observation | One JSON log line per event, plus the counters listed below |
+| Fault injection | `runtime/faults.json`, read periodically by each process |
 
-选择理由见 [ADR 0004](adr/0004-stdlib-sqlite.md) 和 [ADR 0002](adr/0002-job-table.md)。
+Reasons are in [ADR 0004](adr/0004-stdlib-sqlite.md) and [ADR 0002](adr/0002-job-table.md).
 
-## 进程与端口
+## Processes and ports
 
-| 进程 | 监听 | 数量 |
+| Process | Listen | Count |
 | --- | --- | --- |
 | supervisor | 127.0.0.1:8090 | 1 |
 | gateway | 127.0.0.1:8080 | 1 |
-| order | 127.0.0.1:8101 与 :8102 | 固定 2 |
+| order | 127.0.0.1:8101 and :8102 | Fixed at 2 |
 | recommender | 127.0.0.1:8200 | 1 |
-| store | 127.0.0.1:8301 启动时为主，8302 为从；提升后角色对调 | 2 |
-| worker | 127.0.0.1:8401 起，仅探针和指标，业务上只出站访问主存储 | 1 到 3 |
+| store | 127.0.0.1:8301 starts as leader, 8302 as follower; roles swap after promotion | 2 |
+| worker | 127.0.0.1:8401 and up, probes and metrics only; fulfillment calls the leader outbound | 1 to 3 |
 
-订单副本固定为两个，用来在一个副本退出时继续接单。这是容错，不是伸缩。伸缩只改变工人数量：履约变慢时增加消费者，空闲后再收回。
+Order replicas stay at two so one can exit and orders continue. That is resilience, not elasticity. Elasticity changes only the worker count: add consumers when fulfillment is slow, and remove them when idle.
 
-监督者维护一份期望进程表。进程退出则拉起。连续启动失败保留最后一次错误，在状态页上可见，避免无间隔地空转。
+The supervisor keeps a desired process table. A process that exits is started again. Repeated start failures keep the last error on the status page, so the loop does not spin with no gap.
 
-## 写入路径
+## Write path
 
-1. 网关检查令牌桶。没有令牌则 429，并设置 `Retry-After`。
-2. 网关检查主存储公布的待处理任务数。达到 50 则 429。这个数由监督者从主存储读到并缓存，允许最多 1 秒旧。
-3. 网关的在途下单不超过 8。超过则 429。
-4. 网关在就绪的订单副本间轮询。就绪的定义见下文。都不就绪则 503。
-5. 网关写入 `X-Deadline-Ms`（绝对 Unix 毫秒）和 `X-Request-Id`。调用方没带请求号时由网关生成。
-6. 订单进程若已超过截止时间，直接 504，不再访问存储。
-7. 订单进程用 `caller_id + idempotency_key` 向主存储查询。命中则按 [数据模型](data-model.md) 重放或返回 409。
-8. 首次请求并行做两件事：向主存储追加订单和任务；向推荐发起最多 80ms 的请求。
-9. 主存储核对 epoch。不符则 409 `epoch_fenced`。订单进程向监督者要一次最新主地址再试一次。仍然失败则向调用方返回 503。
-10. 主存储把订单、任务、复制日志放进同一个事务，`synchronous=FULL` 提交后再响应。
-11. 推荐的 80ms 从与存储并行发出时起算。存储返回后，只把这个窗口里剩下的时间用来等推荐，然后写入最终快照并返回 201。窗口已经用完则保持首次事务里的降级快照。
+1. The gateway checks the token bucket. No token means 429 and `Retry-After`.
+2. The gateway checks the pending job count published from the leader. At 50 it returns 429. The supervisor reads that number from the leader and caches it. The cache may be up to 1 second old.
+3. In-flight orders at the gateway stay at or below 8. Above that, 429.
+4. The gateway round-robins ready order replicas. Readiness is defined below. If none are ready, 503.
+5. The gateway writes `X-Deadline-Ms` (absolute Unix milliseconds) and `X-Request-Id`. If the caller omitted a request id, the gateway generates one.
+6. If the order process is already past the deadline, it returns 504 and does not call the store.
+7. The order process looks up `caller_id + idempotency_key` on the leader. A hit replays or returns 409, as in the [data model](data-model.md).
+8. A first request does two things in parallel: append the order and job to the leader, and call recommendation for at most 80ms.
+9. The leader checks the epoch. A mismatch is 409 `epoch_fenced`. The order process asks the supervisor for the latest leader address and tries once more. If that still fails, the caller gets 503.
+10. The leader puts the order, the job, and the replication log in one transaction, commits with `synchronous=FULL`, and only then responds.
+11. The 80ms recommendation budget starts when the store call is issued in parallel. After the store returns, only the time left in that window is spent waiting for recommendation. Then the final snapshot is written and 201 is returned. If the window is already gone, the degraded snapshot from the first transaction stays.
 
-存储调用的超时是「剩余截止时间」和 400ms 中较小的那个。
+The store-call timeout is the smaller of the remaining deadline and 400ms.
 
-## 推荐旁路
+## Recommendation side path
 
-推荐进程根据 `sku` 返回一段固定格式的字符串，内容可以是演示用的静态映射。它不访问存储。
+The recommender returns a fixed-format string for a `sku`. The content may be a static demonstration map. It does not touch the store.
 
-每个订单进程有自己的熔断器：
+Each order process has its own breaker:
 
-- 窗口 10 秒，失败 5 次则打开
-- 打开 5 秒后允许一次探测
-- 探测失败则再打开 5 秒
-- 超时、连接失败、非 2xx 都算失败
+- A 10-second window. 5 failures open it
+- After 5 seconds open, one probe is allowed
+- A failed probe opens it for another 5 seconds
+- Timeouts, connection failures, and non-2xx responses all count as failures
 
-熔断打开时跳过网络调用，这次订单 `degraded=true`。两个订单进程的熔断器不共享。一边打开时，另一边仍可能去调用推荐。
+While the breaker is open, the network call is skipped and this order has `degraded=true`. The two order processes do not share a breaker. One side can be open while the other still calls recommendation.
 
-## 任务与工人
+## Jobs and workers
 
-任务表就是队列。工人循环：
+The job table is the queue. A worker loops:
 
-1. 向当前主存储领取最多 1 个已到 `visible_after` 的 `pending` 任务。
-2. 没有任务则等待 200ms 再试。
-3. 若订单有 `fulfill_url`，POST 履约事件，超时 1 秒。2xx 或 409 视为成功。
-4. 没有 `fulfill_url` 时，本地把任务视为成功。
-5. 成功则 ack。失败则 fail。存储把可重试失败放回 `pending`，并设置下一次 `visible_after`。
-6. `attempts` 达到 5 则改为 `dead`，订单 `state` 改为 `fulfillment_failed`。
+1. Claim at most one `pending` job whose `visible_after` has arrived, from the current leader.
+2. If there is no job, wait 200ms and try again.
+3. If the order has `fulfill_url`, POST the fulfillment event with a 1-second timeout. 2xx or 409 is success.
+4. If there is no `fulfill_url`, treat the job as a local success.
+5. On success, ack. On failure, fail. The store puts a retryable failure back to `pending` and sets the next `visible_after`.
+6. When `attempts` reaches 5, the job becomes `dead` and the order `state` becomes `fulfillment_failed`.
 
-退避：第 n 次失败后等待 `min(5s, 100ms * 2^(n-1))` 的全抖动，即在 0 和该上限之间均匀取值。第 1 次失败也等待。
+Backoff: after the nth failure, wait a full-jitter delay of `min(5s, 100ms * 2^(n-1))`, a uniform value from 0 through that cap, inclusive. The first failure waits too.
 
-可见性超时 15 秒。工人在 ack 之前崩溃，任务会在 `visible_after` 之后被其他工人领取。因此履约端必须按 `order_id` 幂等。
+Visibility timeout is 15 seconds. If the worker crashes before ack, another worker can claim the job after `visible_after`. The fulfillment endpoint must therefore be idempotent on `order_id`.
 
-领取、重置、完成、进入死信都追加复制日志，使新主能接着这些状态服务。
+Claim, reset, completion, and dead letter each append a replication log entry, so a new leader can continue from those states.
 
-## 复制与故障转移
+## Replication and failover
 
-主存储提交后异步把日志推给从存储，不阻塞已经返回给订单进程的确认。从存储只接受连续的 `log_index`。推送失败时，主存储按 200ms 间隔重试，并暴露 `orange_replicate_lag`（主日志序号减从存储已应用序号）。
+After commit, the leader pushes the log to the follower asynchronously. That push does not block the confirmation already returned to the order process. The follower accepts only a contiguous `log_index`. On push failure, the leader retries every 200ms and exposes `orange_replicate_lag` (leader log sequence minus the follower’s applied sequence).
 
-心跳：主存储和从存储每 200ms 向监督者报告 `node_id`、`role`、`epoch`、`applied_index`。
+Heartbeats: leader and follower report `node_id`, `role`, `epoch`, and `applied_index` to the supervisor every 200ms.
 
-提升条件同时满足：
+Promotion requires all of:
 
-- 当前主存储的心跳中断超过 1 秒
-- 监督者自己在运行
-- 从存储的心跳仍在
+- The current leader’s heartbeat has been missing for more than 1 second
+- The supervisor itself is running
+- The follower’s heartbeat is still arriving
 
-提升步骤：
+Promotion steps:
 
-1. 监督者令网关暂时不要把新的下单发给订单进程（网关就绪变为假），避免切换瞬间写到旧主。这一步最多维持到新主公布，上限 2 秒，超时则恢复并在状态页标记切换失败。
-2. 监督者调用从存储 `POST /internal/promote`，正文是 `new_epoch = 已知 epoch + 1`。
-3. 从存储把 `role=leader` 和新 epoch 写入 `meta`，追加 `epoch_promoted`，fsync，然后才应答。
-4. 监督者公布新的主地址和 epoch。订单进程下一次写使用新地址。
-5. 旧进程若恢复，发现公布的 epoch 更高，则把自己标成从存储，改为向新主拉日志，不再接受写入。
+1. The supervisor tells the gateway not to forward new orders to order processes (gateway readiness becomes false), so a write does not hit the old leader during the switch. This lasts until the new leader is published, at most 2 seconds. On timeout the gateway resumes and the status page records a failed switch.
+2. The supervisor calls `POST /internal/promote` on the follower. The body is `new_epoch = known epoch + 1`.
+3. The follower writes `role=leader` and the new epoch into `meta`, appends `epoch_promoted`, fsyncs, and only then replies.
+4. The supervisor publishes the new leader address and epoch. The next write from an order process uses the new address.
+5. If the old process returns and sees a higher published epoch, it marks itself the follower, pulls the log from the new leader, and stops accepting writes.
 
-旧主磁盘上尚未推送的日志不会合并进新主。已经返回 201、但没被复制的订单，在新主上不存在。调用方按集成指南用同一幂等键再 POST。这是有意接受的窗口，换来的是从存储停机时主存储仍能接单。
+Log entries still only on the old leader’s disk are not merged into the new leader. An order that already returned 201 but was not replicated does not exist on the new leader. The caller POSTs again with the same idempotency key, as the integration guide says. This window is accepted on purpose. In exchange, the leader can still take orders while the follower is down.
 
-两个存储节点的监听端口不变。变的是监督者公布的「当前主地址」。不要把 8301 写死成永远的主。
+The listen ports of the two store nodes do not change. What changes is the “current leader address” the supervisor publishes. Do not hard-code 8301 as the leader forever.
 
-## 伸缩与背压
+## Scaling and backpressure
 
-| 条件 | 动作 |
+| Condition | Action |
 | --- | --- |
-| `pending` 任务数大于 10，持续 5 秒，且距上次伸缩已超过 15 秒 | 加一个工人，直到 3 个 |
-| `pending` 为 0，持续 20 秒，且工人多于 1 | 停一个工人 |
-| `pending` 达到 50 | 网关对新下单返回 429；已接受的订单继续履约 |
+| `pending` jobs above 10 for 5 seconds, and more than 15 seconds since the last scale action | Add one worker, up to 3 |
+| `pending` is 0 for 20 seconds, and there is more than one worker | Stop one worker |
+| `pending` reaches 50 | The gateway returns 429 for new orders; accepted orders keep being fulfilled |
 
-冷却时间按方向分别计算，避免刚加完就减。监督者不根据 CPU 或单次延迟加减进程。
+Cooldown is counted separately in each direction, so a worker just added is not immediately removed. The supervisor does not add or remove processes because of CPU or a single latency sample.
 
-## 探针
+## Probes
 
-| 路径 | 含义 | 失败时 |
+| Path | Meaning | On failure |
 | --- | --- | --- |
-| `GET /health` | 进程能处理 HTTP | 监督者重启该进程 |
-| `GET /ready` | 可以承担自己的职责 | 从调用路径摘除，不因此重启 |
+| `GET /health` | The process can handle HTTP | The supervisor restarts that process |
+| `GET /ready` | It can do its job | Remove it from the call path. Do not restart it for this |
 
-就绪的具体条件：
+Readiness:
 
-- 网关：至少两个订单进程里有一个就绪，且自己没有处于切换暂停。
-- 订单：在最近 1 秒内从监督者拿到主存储地址，并且该地址的 `/ready` 为真。
-- 主存储：本进程的 role 是 leader，且 epoch 等于自己 fsync 过的 epoch。
-- 从存储：复制循环在运行。从存储不接受订单写入。
-- 推荐：进程能回答。它不就绪只影响降级，不影响网关就绪。
-- 工人：知道当前主地址。工人没有负载均衡，不需要被网关摘除。
+- Gateway: at least one of the two order processes is ready, and the gateway itself is not paused for a switch.
+- Order: it received a leader address from the supervisor within the last 1 second, and that address’s `/ready` is true.
+- Leader store: this process’s role is leader, and the epoch equals the epoch it has fsynced.
+- Follower store: the replication loop is running. The follower does not accept order writes.
+- Recommender: the process can answer. Not ready only affects degradation. It does not affect gateway readiness.
+- Worker: it knows the current leader address. Workers are not load-balanced and do not need to be removed by the gateway.
 
-「不能访问主存储」是未就绪，不是存活失败。订单进程因此被摘除，而不会被反复重启。
+“Cannot reach the leader store” is not ready. It is not a liveness failure. The order process is removed from rotation and is not restarted in a loop.
 
-## 观测
+## Observation
 
-每条日志一行 JSON：
+Each log line is one JSON object:
 
 ```json
 {"ts":"2026-10-10T00:00:00Z","level":"info","process":"order-1","event":"order_accepted","request_id":"req_...","order_id":"ord_...","epoch":1,"degraded":false}
 ```
 
-必有字段：`ts`、`level`、`process`、`event`、`request_id`（没有请求时为空字符串）。
+Required fields: `ts`, `level`, `process`, `event`, and `request_id` (empty string when there is no request).
 
-实现时至少打出这些事件：`rate_limited`、`order_accepted`、`order_replayed`、`recommend_failed`、`breaker_open`、`deadline_exceeded`、`write_fenced`、`job_claimed`、`job_done`、`job_retry`、`job_dead`、`promoted`、`replicate_lag`。
+Implementations emit at least these events: `rate_limited`, `order_accepted`, `order_replayed`, `recommend_failed`, `breaker_open`, `deadline_exceeded`, `write_fenced`, `job_claimed`, `job_done`, `job_retry`, `job_dead`, `promoted`, `replicate_lag`.
 
-每个进程提供 `GET /metrics`，正文为一种简单文本，每行 `名字 数值`。名字固定为：
+Each process serves `GET /metrics`. The body is plain text, one `name value` per line. The names are fixed:
 
-| 指标 | 谁上报 | 含义 |
+| Metric | Who reports it | Meaning |
 | --- | --- | --- |
-| orange_errors_total | 各进程 | 该进程视为失败的操作次数 |
-| orange_inflight | 网关、订单 | 正在处理的下单数 |
-| orange_jobs_pending | 主存储 | 待领取任务数 |
-| orange_replicate_lag | 主存储 | 尚未应用到从存储的日志条数 |
-| orange_breaker_open | 订单 | 1 表示熔断打开，0 表示否 |
+| orange_errors_total | Each process | Operations that process counts as failures |
+| orange_inflight | Gateway, order | Orders being handled now |
+| orange_jobs_pending | Leader store | Jobs waiting to be claimed |
+| orange_replicate_lag | Leader store | Log entries not yet applied on the follower |
+| orange_breaker_open | Order | 1 if the breaker is open, otherwise 0 |
 
-监督者 `GET /v1/status` 汇总：当前主地址、epoch、两个存储的 applied_index、工人数量、各进程就绪、最近一次切换错误。
+The supervisor’s `GET /v1/status` summarizes the current leader address, epoch, both stores’ applied_index, worker count, each process’s readiness, and the last promotion error.
 
-## 故障注入
+## Fault injection
 
-文件 `runtime/faults.json`。各进程约每 200ms 读取。文件缺失或 JSON 非法时当作没有故障，并打一条错误日志。
+File `runtime/faults.json`. Each process reads it about every 200ms. A missing file or illegal JSON means no faults, plus one error log.
 
 ```json
 {
@@ -174,45 +174,45 @@
 }
 ```
 
-| 字段 | 效果 |
+| Field | Effect |
 | --- | --- |
-| delay_ms.store | 主存储在处理追加前睡眠 |
-| delay_ms.recommender | 推荐在回答前睡眠 |
-| pause_replication | 主存储停止推送日志 |
-| drop_heartbeat.store-a | 该存储节点停止心跳，用来演示切换 |
-| exit_after_requests | 该进程每处理完这么多个请求就退出；0 表示不退出 |
+| delay_ms.store | The leader sleeps before handling an append |
+| delay_ms.recommender | Recommendation sleeps before answering |
+| pause_replication | The leader stops pushing the log |
+| drop_heartbeat.store-a | That store node stops heartbeats, to demonstrate failover |
+| exit_after_requests | That process exits after this many requests; 0 means never |
 
-演示切换时用 `drop_heartbeat`，不要先删 sqlite 文件。
+Demonstrate failover with `drop_heartbeat`. Do not delete the sqlite file first.
 
-## 参数
+## Parameters
 
-实现时把这些数集中在一处常量里。改行为先改这份表。
+Keep these numbers in one place. Change the table before changing the behavior.
 
-| 参数 | 值 |
+| Parameter | Value |
 | --- | --- |
-| 令牌桶容量 | 30 |
-| 令牌补充 | 每秒 10 |
-| 网关在途上限 | 8 |
-| 拒绝新单的任务积压 | 50 |
-| 下单截止时间 | 800ms |
-| 存储调用上限 | 剩余时间与 400ms 的较小值 |
-| 推荐等待 | 80ms |
-| 熔断 | 10 秒内 5 次失败，打开 5 秒 |
-| 任务可见性超时 | 15 秒 |
-| 履约 HTTP 超时 | 1 秒 |
-| 任务最大尝试次数 | 5 |
-| 退避 | 100ms 起倍增，封顶 5 秒，全抖动 |
-| 心跳间隔 | 200ms |
-| 判定主存储失联 | 1 秒 |
-| 加一个工人 | pending 大于 10 持续 5 秒 |
-| 停一个工人 | pending 为 0 持续 20 秒 |
-| 伸缩冷却 | 15 秒 |
-| 工人数量 | 最少 1，最多 3 |
-| 订单副本 | 固定 2 |
+| Token bucket capacity | 30 |
+| Token refill | 10 per second |
+| Gateway in-flight limit | 8 |
+| Pending jobs that reject new orders | 50 |
+| Order deadline | 800ms |
+| Store call cap | The smaller of the remaining time and 400ms |
+| Recommendation wait | 80ms |
+| Breaker | 5 failures within 10 seconds, open for 5 seconds |
+| Job visibility timeout | 15 seconds |
+| Fulfillment HTTP timeout | 1 second |
+| Maximum job attempts | 5 |
+| Backoff | Starts at 100ms, doubles, caps at 5 seconds, full jitter |
+| Heartbeat interval | 200ms |
+| Leader considered lost | 1 second |
+| Add one worker | pending above 10 for 5 seconds |
+| Stop one worker | pending is 0 for 20 seconds |
+| Scale cooldown | 15 seconds |
+| Worker count | At least 1, at most 3 |
+| Order replicas | Fixed at 2 |
 
-## 代码布局
+## Code layout
 
-六种实现并排，机制留在各自的进程代码里，不放进 Web 框架或容器编排。文件对照写在每种语言的 README 里。
+The six implementations sit side by side. Mechanisms stay in each language’s process code, not in a web framework or a container orchestrator. File maps are in each language’s README.
 
 ```text
 python/   rust/   java/   cpp/   go/
@@ -220,44 +220,44 @@ runtime/faults.json
 runtime/data/
 ```
 
-## 实施顺序
+## Build order
 
-每一阶段结束时，系统可以独立运行，并演示该行的行为。
+At the end of each stage the system can run on its own and demonstrate that row.
 
-| 阶段 | 交付 | 演示 |
+| Stage | Delivered | Demonstrates |
 | --- | --- | --- |
-| 1 | 单进程接单和 sqlite 幂等 | 同一把钥匙不会产生两笔订单；正文冲突返回 409 |
-| 2 | 网关、两个订单副本、探针、令牌桶 | 停掉一个副本后仍能下单；打满返回 429 |
-| 3 | 推荐、80ms 上限、熔断 | 推荐退出后 201 且 degraded 为 true |
-| 4 | 任务表、工人、退避、死信、fulfill_url | 工人中途退出后任务被再领；持续失败进入死信 |
-| 5 | 从存储、epoch、监督者切换 | 心跳停止后新 epoch 接写；旧 epoch 被拒绝 |
-| 6 | 按积压加减工人 | 积压升高后工人变为 3，清空后回到 1 |
-| 7 | 指标、JSON 日志、故障文件 | 用 request_id 把一次延迟注入串起来 |
+| 1 | Single-process accept and sqlite idempotency | The same key does not create two orders; a conflicting body returns 409 |
+| 2 | Gateway, two order replicas, probes, token bucket | Stopping one replica still accepts orders; a full bucket returns 429 |
+| 3 | Recommendation, 80ms cap, breaker | Recommendation exit returns 201 with degraded true |
+| 4 | Job table, worker, backoff, dead letter, fulfill_url | A worker that exits mid-job is claimed again; repeated failure becomes a dead letter |
+| 5 | Follower, epoch, supervisor switch | After heartbeats stop, a new epoch accepts writes; the old epoch is rejected |
+| 6 | Add and remove workers by backlog | After the backlog rises, workers become 3; after it drains, they return to 1 |
+| 7 | Metrics, JSON logs, fault file | One injected delay can be tied together with request_id |
 
-## 验收场景
+## Acceptance
 
-| 编号 | 操作 | 通过标准 |
+| Id | Action | Pass |
 | --- | --- | --- |
-| AC-1 | 相同钥匙和正文 POST 两次 | 只有一个 order_id，两次都是 201 |
-| AC-2 | 相同钥匙、不同 sku | 第二次 409，库里仍是第一笔 |
-| AC-3 | 停止订单 B | 新单仍 201，状态页里 B 未就绪随后被拉起 |
-| AC-4 | 停止推荐 | 201，degraded 为 true，recommendation 为 null |
-| AC-5 | 连续让推荐失败 | 订单进程熔断打开，后续请求不再连接推荐 |
-| AC-6 | 令牌耗尽 | 429，带 Retry-After |
-| AC-7 | 工人在领取后退出 | 15 秒内任务回到 pending 并被再次领取；履约只生效一次 |
-| AC-8 | 履约地址连续返回 500 | 5 次后订单变为 fulfillment_failed |
-| AC-9 | 主存储停止心跳 | 从存储以更大 epoch 接写；旧进程恢复后的写入被拒绝 |
-| AC-10 | 制造 50 个未完成任务 | 新单 429；工人继续处理旧任务 |
-| AC-11 | 积压超过 10 并保持 | 工人数增加到 3，且不会在冷却期内来回增减 |
-| AC-12 | 注入存储延迟 | 同一 request_id 出现在网关、订单和存储日志里 |
+| AC-1 | POST twice with the same key and body | One order_id, both responses 201 |
+| AC-2 | Same key, different sku | The second response is 409; the stored order is still the first |
+| AC-3 | Stop order B | New orders are still 201; the status page shows B not ready, then started again |
+| AC-4 | Stop recommendation | 201, degraded true, recommendation null |
+| AC-5 | Make recommendation fail repeatedly | The order process opens its breaker; later requests do not connect to recommendation |
+| AC-6 | Exhaust tokens | 429, with Retry-After |
+| AC-7 | Worker exits after claim | Within 15 seconds the job returns to pending and is claimed again; fulfillment takes effect once |
+| AC-8 | Fulfillment URL keeps returning 500 | After 5 attempts the order becomes fulfillment_failed |
+| AC-9 | Leader stops heartbeats | The follower accepts writes at a higher epoch; writes after the old process returns are rejected |
+| AC-10 | Create 50 unfinished jobs | New orders get 429; workers keep processing old jobs |
+| AC-11 | Backlog stays above 10 | Worker count rises to 3, and does not oscillate inside the cooldown |
+| AC-12 | Inject store delay | The same request_id appears in gateway, order, and store logs |
 
-## 风险
+## Risks
 
-| 风险 | 第一版的处理 |
+| Risk | Version one |
 | --- | --- |
-| 主存储确认后、复制前崩溃 | 记录可能只在旧文件里。调用方用同一钥匙重试。不在第一版做多数派 |
-| 监督者暂停网关的 2 秒内调用方失败 | 返回 503，允许同一钥匙重试 |
-| 两个订单进程的熔断器不一致 | 接受。共享熔断器要额外的状态，不值得放进第一版 |
-| 墙钟影响任务可见时间 | 只影响重试早晚，不影响订单顺序 |
-| 无身份认证 | 只监听 127.0.0.1。不把网关暴露到其他机器 |
-| fulfill_url 被用来访问任意主机 | 只允许 `http://127.0.0.1` |
+| Leader crashes after confirm and before replication | The record may exist only in the old file. The caller retries with the same key. Version one does not build a majority |
+| Caller fails during the 2 seconds the supervisor pauses the gateway | Return 503. The same key may be retried |
+| The two order processes disagree about the breaker | Accepted. A shared breaker needs extra state and is not worth version one |
+| Wall clock affects when a job is visible | It only changes how early or late a retry happens. It does not change order sequence |
+| No authentication | Listen only on 127.0.0.1. Do not expose the gateway to other machines |
+| fulfill_url used to reach an arbitrary host | Only `http://127.0.0.1` is allowed |

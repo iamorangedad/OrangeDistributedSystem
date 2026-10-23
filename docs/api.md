@@ -1,28 +1,28 @@
-# 接口说明
+# API
 
-英文版：[API](en/api.md)。
+Chinese: [接口说明](zh/api.md).
 
-| 项 | 值 |
+| Item | Value |
 | --- | --- |
-| 状态 | 设计 0.1 已实现 |
-| 版本 | 0.1 |
-| 日期 | 2026-10-10 |
+| Status | Design 0.1 is implemented |
+| Version | 0.1 |
+| Date | 2026-10-10 |
 
-对外契约以 [OpenAPI](openapi.yaml) 为准。本文补充语义，并定义进程之间的内部接口。内部接口不承诺给另一个项目使用。
+The external contract is [OpenAPI](openapi.yaml). This document adds semantics and defines the interfaces between processes. Internal interfaces are not promised to another project.
 
-## 公共约定
+## Shared rules
 
-对外基地址：`http://127.0.0.1:8080`。
+External base URL: `http://127.0.0.1:8080`.
 
-| 头 | 方向 | 要求 |
+| Header | Direction | Rule |
 | --- | --- | --- |
-| X-Caller-Id | 请求 | 对外业务接口必填。`[a-z0-9-]{1,32}` |
-| Idempotency-Key | 请求 | `POST /v1/orders` 必填。可见 ASCII，长度 8 到 128 |
-| X-Request-Id | 请求可选，响应必有 | 未提供时网关生成 `req_` 加 32 位十六进制 |
-| Content-Type | 请求 | 带正文时为 `application/json` |
-| Retry-After | 响应 | 仅 429。秒数，整数 |
+| X-Caller-Id | Request | Required on external business APIs. `[a-z0-9-]{1,32}` |
+| Idempotency-Key | Request | Required on `POST /v1/orders`. Visible ASCII, length 8 to 128 |
+| X-Request-Id | Optional on request, required on response | If omitted, the gateway generates `req_` plus 32 hex digits |
+| Content-Type | Request | `application/json` when a body is present |
+| Retry-After | Response | Only on 429. Integer seconds |
 
-错误正文：
+Error body:
 
 ```json
 {
@@ -34,54 +34,54 @@
 }
 ```
 
-| HTTP | code | 含义 |
+| HTTP | code | Meaning |
 | --- | --- | --- |
-| 400 | invalid_argument | 字段、请求头或 fulfill_url 不合法 |
-| 404 | not_found | 该调用方名下没有这笔订单 |
-| 409 | idempotency_mismatch | 钥匙已用过，正文不同 |
-| 409 | epoch_fenced | 仅内部。写到了旧代际 |
-| 429 | rate_limited | 令牌用尽、在途已满，或待处理任务达到 50 |
-| 503 | unavailable | 没有就绪副本，或主存储切换未完成 |
-| 504 | deadline_exceeded | 超过这次请求的截止时间 |
+| 400 | invalid_argument | A field, header, or fulfill_url is illegal |
+| 404 | not_found | This caller has no such order |
+| 409 | idempotency_mismatch | The key was used with a different body |
+| 409 | epoch_fenced | Internal only. The write hit an old generation |
+| 429 | rate_limited | Tokens are gone, in-flight is full, or pending jobs reached 50 |
+| 503 | unavailable | No ready replica, or the leader switch is not finished |
+| 504 | deadline_exceeded | This request passed its deadline |
 
-未知字段忽略。数字必须是 JSON 数字，不能是字符串。
+Unknown fields are ignored. Numbers must be JSON numbers, not strings.
 
-## 对外接口
+## External API
 
 ### POST /v1/orders
 
-创建订单，或重放已有订单。成功为 201，包括幂等重放。
+Create an order, or replay an existing one. Success is 201, including an idempotent replay.
 
-请求体：
+Request body:
 
-| 字段 | 类型 | 必填 | 约束 |
+| Field | Type | Required | Constraint |
 | --- | --- | --- | --- |
-| sku | string | 是 | 1 到 64 字符 |
-| qty | integer | 是 | 1 到 100 |
-| external_ref | string | 否 | 最多 128 字符 |
-| fulfill_url | string | 否 | `http://127.0.0.1:<port><path>`，不含用户名和密码 |
+| sku | string | yes | 1 to 64 characters |
+| qty | integer | yes | 1 to 100 |
+| external_ref | string | no | At most 128 characters |
+| fulfill_url | string | no | `http://127.0.0.1:<port><path>`, no username or password |
 
-201 的正文见 [集成指南](integration.md) 的示例。`fulfillment.status` 取 `pending`、`inflight`、`done`、`dead`。`fulfillment.attempts` 是已开始次数。`fulfillment.last_error` 没有错误时为 null。
+The 201 body is the example in the [integration guide](integration.md). `fulfillment.status` is `pending`, `inflight`, `done`, or `dead`. `fulfillment.attempts` is how many times the job has started. `fulfillment.last_error` is null when there is no error.
 
 ### GET /v1/orders/{order_id}
 
-返回该调用方的当前快照。路径中的 `order_id` 必须整段匹配。
+Returns the current snapshot for that caller. `order_id` in the path must match the whole segment.
 
 ### GET /v1/orders?idempotency_key={key}
 
-用钥匙找回订单。缺少查询参数时 400。找不到时 404。
+Finds an order by key. A missing query parameter is 400. Not found is 404.
 
-### GET /health 与 GET /ready
+### GET /health and GET /ready
 
-无正文要求。200 表示通过，503 表示不通过。网关的这两个路径给监督者用，调用方可以用它们判断入口是否可发送下单。
+No body is required. 200 means pass, 503 means fail. On the gateway these paths are for the supervisor. A caller may use them to decide whether the entrance can take an order.
 
 ### GET /metrics
 
-文本，每行一个 `名字 数值`。名字见 [技术方案](technical-design.md) 的观测一节。
+Text, one `name value` per line. Names are in the observation section of the [technical design](technical-design.md).
 
 ### GET /v1/status
 
-只由监督者在 8090 提供，网关不转发。供实验者查看，不是下单契约的一部分。
+Served only by the supervisor on 8090. The gateway does not forward it. It is for the experimenter, not part of the order contract.
 
 ```json
 {
@@ -96,42 +96,42 @@
 }
 ```
 
-## 内部接口
+## Internal API
 
-内部请求同样携带 `X-Request-Id` 和 `X-Deadline-Ms`。存储不信任调用方自称的 epoch 来提升自己；提升只接受监督者。
+Internal requests also carry `X-Request-Id` and `X-Deadline-Ms`. A store does not promote itself because a caller claims an epoch. Promotion accepts only the supervisor.
 
-### 监督者
+### Supervisor
 
-| 方法与路径 | 调用者 | 作用 |
+| Method and path | Caller | Effect |
 | --- | --- | --- |
-| GET /internal/leader | 订单、工人 | 返回 `{leader, epoch}` |
-| POST /internal/heartbeat | 两个存储 | 正文含 node_id、role、epoch、applied_index |
-| POST /internal/promote | 监督者调用存储 | 正文 `{new_epoch}`。存储 fsync 后才返回 200 |
+| GET /internal/leader | Order, worker | Returns `{leader, epoch}` |
+| POST /internal/heartbeat | Both stores | Body has node_id, role, epoch, applied_index |
+| POST /internal/promote | Supervisor calls a store | Body `{new_epoch}`. The store returns 200 only after fsync |
 
-### 订单进程
+### Order process
 
-`POST /internal/orders` 接收网关转发的对外正文，另加调用方、钥匙、截止时间和请求号。响应与对外 201 相同，错误码也相同。
+`POST /internal/orders` receives the external body forwarded by the gateway, plus caller, key, deadline, and request id. The response matches the external 201, and so do the error codes.
 
-`GET /internal/recommend?sku=` 由订单进程调用推荐。200 正文 `{"recommendation":"..."}`。超过 80ms 由订单进程放弃，不把推荐的慢当作下单失败。
+`GET /internal/recommend?sku=` is the order process calling recommendation. A 200 body is `{"recommendation":"..."}`. After 80ms the order process gives up. A slow recommendation is not an order failure.
 
-### 存储
+### Store
 
-| 方法与路径 | 作用 |
+| Method and path | Effect |
 | --- | --- |
-| POST /internal/append | 首次下单。正文含期望 epoch、调用方、钥匙、正文摘要、订单字段。成功返回 order_id、log_index、epoch |
-| GET /internal/orders/by-key | 查询幂等记录 |
-| GET /internal/orders/{order_id} | 读取快照 |
-| POST /internal/snapshot | 写入推荐结果和 degraded，更新 response_json |
-| POST /internal/jobs/claim | 正文 `{worker_id}`。200 返回任务，204 表示当前没有 |
-| POST /internal/jobs/{job_id}/ack | 完成任务并推进订单状态 |
-| POST /internal/jobs/{job_id}/fail | 正文 `{retryable, error}` |
-| POST /internal/replicate | 从存储接收一批连续日志 |
-| GET /internal/log?after={index} | 从存储补拉 `log_index > after` 的日志 |
+| POST /internal/append | First submission. Body has the expected epoch, caller, key, body digest, and order fields. Success returns order_id, log_index, epoch |
+| GET /internal/orders/by-key | Look up the idempotency record |
+| GET /internal/orders/{order_id} | Read the snapshot |
+| POST /internal/snapshot | Write recommendation and degraded, update response_json |
+| POST /internal/jobs/claim | Body `{worker_id}`. 200 returns a job, 204 means none is visible |
+| POST /internal/jobs/{job_id}/ack | Finish the job and advance the order state |
+| POST /internal/jobs/{job_id}/fail | Body `{retryable, error}` |
+| POST /internal/replicate | Follower receives a contiguous batch of log entries |
+| GET /internal/log?after={index} | Follower pulls entries with `log_index > after` |
 
-`POST /internal/append` 在 epoch 低于当前值时返回 409 `epoch_fenced`，正文附带存储自己的 epoch。钥匙已存在且摘要相同则返回已有订单，不新增 log_index。摘要不同返回 409 `idempotency_mismatch`。
+`POST /internal/append` returns 409 `epoch_fenced` when the epoch is below the current value, and the body includes the store’s own epoch. If the key exists and the digest matches, it returns the existing order and does not add a log_index. A different digest returns 409 `idempotency_mismatch`.
 
-claim、ack、fail 只接受当前主存储上的请求。从存储对这些路径返回 409 `epoch_fenced`。
+claim, ack, and fail are accepted only on the current leader. The follower returns 409 `epoch_fenced` for those paths.
 
-## 履约回调
+## Fulfillment callback
 
-这是 OrangeOrder 调用外部项目，不是外部项目调用 OrangeOrder。正文和状态码约定写在 [集成指南](integration.md)。超时 1 秒，不跟随重定向。
+This is OrangeOrder calling the other project, not the other project calling OrangeOrder. The body and status codes are in the [integration guide](integration.md). The timeout is 1 second. Redirects are not followed.

@@ -1,35 +1,35 @@
-# ADR 0002：用任务表充当队列
+# ADR 0002: The job table is the queue
 
-英文版：[English](../en/adr/0002-job-table.md)。
+Chinese: [中文](../zh/adr/0002-job-table.md).
 
-- 状态：已接受
-- 日期：2026-10-10
+- Status: accepted
+- Date: 2026-10-10
 
-## 背景
+## Context
 
-履约必须晚于接单，并且工人崩溃后任务还在。独立的消息中间件能提供投递、确认和堆积，但进程本身也要持久化和故障转移，学习时容易把「队列语义」做成「把 Kafka 跑起来」。
+Fulfillment must happen after acceptance, and the job must survive a worker crash. A separate message broker can deliver, acknowledge, and pile up, but that process also needs persistence and failover. The lesson then becomes “get Kafka running” instead of the queue semantics.
 
-订单和任务如果分两次写，会出现订单已确认但任务丢失，或者任务存在而订单不存在。
+If the order and the job are written in two steps, the order can be confirmed without a job, or a job can exist without an order.
 
-## 决策
+## Decision
 
-主存储的 `jobs` 表就是队列。订单行、任务行和一条 `order_created` 日志在同一个 sqlite 事务里提交。
+The leader’s `jobs` table is the queue. The order row, the job row, and one `order_created` log entry commit in the same sqlite transaction.
 
-工人用领取把任务改成 `inflight`，并设置 15 秒后的 `visible_after`。到点仍未完成则可以再次领取。处理方按 `order_id` 幂等。
+A worker claims a job by moving it to `inflight` and setting `visible_after` 15 seconds ahead. When that time passes, the job can be claimed again. The handler is idempotent on `order_id`.
 
-尝试次数到达 5 次后任务进入 `dead`，订单变为 `fulfillment_failed`。没有单独的死信进程。
+After 5 attempts the job becomes `dead` and the order becomes `fulfillment_failed`. There is no separate dead-letter process.
 
-待处理任务达到 50 时，网关拒绝新单。队列负责削峰，不负责无限接收。
+When pending jobs reach 50, the gateway rejects new orders. The queue absorbs bursts. It does not accept without bound.
 
-## 后果
+## Consequences
 
-存储主从切换时，任务状态跟着复制日志走，工人只朝当前主存储领取。
+On store failover, job state travels with the replication log. Workers claim only from the current leader.
 
-少一个必须自己做高可用的中间件。队列的可见性超时、重试和死信仍然都在路径上。
+One fewer middleware system that would need its own high availability. Visibility timeout, retry, and dead letter are still on the path.
 
-积压高时，下单和履约会抢同一份 sqlite。演示规模是每秒约 10 个新单，这个争用可以接受。
+When the backlog is high, order writes and fulfillment contend for the same sqlite file. The demonstration rate is about 10 new orders per second, and that contention is acceptable.
 
-## 放弃的方案
+## Rejected
 
-- 内存队列加单独的发件箱进程。队列进程重启会丢掉已取出、未确认的消息，还要再做一套回补。
-- 引入 Kafka 或兼容协议。运维和术语都会盖过要看的确认、重试和死信。
+- An in-memory queue plus a separate outbox process. A restart drops messages that were taken and not acknowledged, and then needs another recovery path.
+- Kafka or a compatible protocol. Operations and vocabulary would cover acknowledgement, retry, and dead letter.
