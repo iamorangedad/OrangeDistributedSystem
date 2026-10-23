@@ -1,41 +1,41 @@
-# OrangeOrder 的 Rust 实现
+# OrangeOrder in Rust
 
-[English](README.en.md)
+[中文](README.zh.md)
 
-这一份和 Python、Java、C++、Go 做同一件事：单机上的多进程下单。对外端口、错误码、日志事件和 AC-1 到 AC-12 都对齐 [技术方案](../docs/technical-design.md)。语言差异见 [ADR 0004](../docs/adr/0004-stdlib-sqlite.md)。
+This implementation does the same job as Python, Java, C++, and Go: a single-machine, multi-process order system. Ports, error codes, log events, and AC-1 through AC-12 follow the [technical design](../docs/technical-design.md). Language differences are in [ADR 0004](../docs/adr/0004-stdlib-sqlite.md).
 
-Rust 这边不用 Web 框架，也不用异步运行时。每个进程仍是线程加锁，HTTP 用 `TcpListener` 自己解析。sqlite 用 `rusqlite`，随二进制带上。这样读代码时看到的是接单、复制和熔断，而不是框架的生命周期。
+Rust does not use a web framework or an async runtime. Each process is threads and a lock. HTTP is parsed on a blocking `TcpListener`. sqlite comes from `rusqlite`, bundled into the binary. The code you read is order acceptance, replication, and the breaker, not a framework lifecycle.
 
-监督者拉起同一个可执行文件的不同子命令。一次只启动一种语言。六套都绑定 8080、8090、8101 这些端口。
+The supervisor re-executes the same binary with a subcommand. Run one language at a time. All six stacks bind 8080, 8090, 8101, and the other fixed ports.
 
-## 怎么跑
+## Run
 
-在仓库根目录：
+From the repository root:
 
 ```bash
 cargo run --manifest-path rust/Cargo.toml -- --root .
 ```
 
-调用方仍然只访问 `http://127.0.0.1:8080`。
+Callers still use only `http://127.0.0.1:8080`.
 
 ```bash
 cargo test --manifest-path rust/Cargo.toml -- --test-threads=1
 ```
 
-验收测试会真的拉起监督者和全部子进程，大约需要一两分钟。`--test-threads=1` 是因为端口固定，不能两套一起听。
+The acceptance test starts the supervisor and every child. It takes about a minute or two. `--test-threads=1` is required because the ports are fixed.
 
-## 六种实现的文件对照
+## File map across six implementations
 
-| 职责 | Python | Rust | Java | C++ | Go | TypeScript |
+| Role | Python | Rust | Java | C++ | Go | TypeScript |
 | --- | --- | --- | --- | --- | --- | --- |
-| 入口 | `python/src/orange/__main__.py` | `rust/src/main.rs` | `java/src/orange/Main.java` | `cpp/src/main.cpp` | `go/main.go` | `ts/src/main.ts` |
-| 公共库 | `python/src/orange/common.py` | `rust/src/common.rs`、`http_util.rs` | `Common.java`、`HttpUtil.java`、`Json.java` | `cpp/src/common.cpp`、`http.cpp`、`json.cpp` | `go/common.go`、`http.go` | `ts/src/common.ts`、`http.ts` |
-| 网关 | `python/src/orange/gateway.py` | `rust/src/gateway.rs` | `java/src/orange/Gateway.java` | `cpp/src/gateway.cpp` | `go/gateway.go` | `ts/src/gateway.ts` |
-| 订单 | `python/src/orange/order_service.py` | `rust/src/order.rs` | `java/src/orange/OrderService.java` | `cpp/src/order.cpp` | `go/order.go` | `ts/src/order.ts` |
-| 推荐 | `python/src/orange/recommender.py` | `rust/src/recommender.rs` | `java/src/orange/Recommender.java` | `cpp/src/recommender.cpp` | `go/recommender.go` | `ts/src/recommender.ts` |
-| 存储 | `python/src/orange/store.py` | `rust/src/store.rs` | `java/src/orange/Store.java` | `cpp/src/store.cpp` | `go/store.go` | `ts/src/store.ts` |
-| 工人 | `python/src/orange/worker.py` | `rust/src/worker.rs` | `java/src/orange/Worker.java` | `cpp/src/worker.cpp` | `go/worker.go` | `ts/src/worker.ts` |
-| 监督者 | `python/src/orange/supervisor.py` | `rust/src/supervisor.rs` | `java/src/orange/Supervisor.java` | `cpp/src/supervisor.cpp` | `go/supervisor.go` | `ts/src/supervisor.ts` |
-| 验收 | `python/tests/` | `rust/tests/acceptance.rs` | `java/test/orange/Acceptance.java` | `cpp/tests/acceptance.cpp` | `go/acceptance/` | `ts/src/acceptance.test.ts` |
+| Entry | `python/src/orange/__main__.py` | `rust/src/main.rs` | `java/src/orange/Main.java` | `cpp/src/main.cpp` | `go/main.go` | `ts/src/main.ts` |
+| Shared library | `python/src/orange/common.py` | `rust/src/common.rs`, `http_util.rs` | `Common.java`, `HttpUtil.java`, `Json.java` | `cpp/src/common.cpp`, `http.cpp`, `json.cpp` | `go/common.go`, `http.go` | `ts/src/common.ts`, `http.ts` |
+| Gateway | `python/src/orange/gateway.py` | `rust/src/gateway.rs` | `java/src/orange/Gateway.java` | `cpp/src/gateway.cpp` | `go/gateway.go` | `ts/src/gateway.ts` |
+| Order | `python/src/orange/order_service.py` | `rust/src/order.rs` | `java/src/orange/OrderService.java` | `cpp/src/order.cpp` | `go/order.go` | `ts/src/order.ts` |
+| Recommender | `python/src/orange/recommender.py` | `rust/src/recommender.rs` | `java/src/orange/Recommender.java` | `cpp/src/recommender.cpp` | `go/recommender.go` | `ts/src/recommender.ts` |
+| Store | `python/src/orange/store.py` | `rust/src/store.rs` | `java/src/orange/Store.java` | `cpp/src/store.cpp` | `go/store.go` | `ts/src/store.ts` |
+| Worker | `python/src/orange/worker.py` | `rust/src/worker.rs` | `java/src/orange/Worker.java` | `cpp/src/worker.cpp` | `go/worker.go` | `ts/src/worker.ts` |
+| Supervisor | `python/src/orange/supervisor.py` | `rust/src/supervisor.rs` | `java/src/orange/Supervisor.java` | `cpp/src/supervisor.cpp` | `go/supervisor.go` | `ts/src/supervisor.ts` |
+| Acceptance | `python/tests/` | `rust/tests/acceptance.rs` | `java/test/orange/Acceptance.java` | `cpp/tests/acceptance.cpp` | `go/acceptance/` | `ts/src/acceptance.test.ts` |
 
-Java 类都在 `java/src/orange/`。行为以技术方案的参数表为准。
+Java classes live in `java/src/orange/`. Behavior follows the parameter table in the technical design.

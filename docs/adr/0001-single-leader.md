@@ -1,36 +1,36 @@
-# ADR 0001：单主复制，用 epoch 隔离旧主
+# ADR 0001: Single leader, fenced by epoch
 
-英文版：[English](../en/adr/0001-single-leader.md)。
+Chinese: [中文](../../adr/0001-single-leader.md).
 
-- 状态：已接受
-- 日期：2026-10-10
+- Status: accepted
+- Date: 2026-10-10
 
-## 背景
+## Context
 
-存储要能在进程消失后继续接单，也要避免两个进程同时确认写入。可选的做法包括单主加异步副本、同步复制到从节点、多主，以及 Raft/Paxos。
+The store must keep accepting orders after a process disappears, and two processes must not confirm writes at the same time. Options include a single leader with an async replica, synchronous replication to the follower, multi-leader, and Raft/Paxos.
 
-学习项目还要能把「分区时到底牺牲什么」说清楚。调用方需要知道，收到 201 之后在什么情况下这笔订单还可能查不到。
+A learning project also has to say what a partition gives up. The caller needs to know when an order that already received 201 might still be missing.
 
-## 决策
+## Decision
 
-任意时刻只有一个主存储可以确认写入。确认发生在主库事务提交并且 `synchronous=FULL` 之后。从存储异步应用复制日志，允许落后。
+At any moment only one leader store may confirm a write. Confirmation happens after the leader transaction commits with `synchronous=FULL`. The follower applies the replication log asynchronously and may lag.
 
-每次故障转移把 epoch 加 1。从存储先把新 epoch fsync 到自己的库里，才开始接写。旧 epoch 的追加一律拒绝。
+Each failover increments the epoch. The follower fsyncs the new epoch into its own database before it accepts writes. Appends from an old epoch are rejected.
 
-监督者是唯一可以发起提升的角色。监督者停机时不选新主，现任主存储继续服务。
+The supervisor is the only role that may start a promotion. While the supervisor is down, no new leader is chosen and the current leader keeps serving.
 
-已经返回给调用方、但还没复制到从存储的订单，在切换后可能只留在旧文件里。调用方用同一幂等键再 POST 即可补上。第一版不把这段尾巴自动合并回新主。
+An order already returned to the caller, but not yet replicated, can remain only in the old file after failover. The caller POSTs again with the same idempotency key. Version one does not merge that tail back into the new leader.
 
-## 后果
+## Consequences
 
-从存储停机时，主存储仍能下单。主存储在复制前提前消失时，最多丢掉尚未复制的尾部。
+When the follower is down, the leader can still take orders. If the leader disappears before replication, at most the unreplicated tail is lost.
 
-读自己的写入走当前主存储。从存储不对外提供下单读取。
+Read-your-writes goes to the current leader. The follower does not serve order reads.
 
-Raft、多主和跨地域多活留到这套切换能演示之后再考虑。
+Raft, multi-leader, and multi-region active-active wait until this failover can be demonstrated.
 
-## 放弃的方案
+## Rejected
 
-- 等从存储确认后再给调用方 201。从存储一停，下单就停，学不到「副本落后」和「尾部丢失」的差别。
-- 多主同时写。冲突怎么合并会压过下单这条主线。
-- 在第一版实现 Raft。选票、日志匹配和成员变更会盖住业务路径。
+- Waiting for the follower to confirm before returning 201. If the follower stops, orders stop, and the difference between “replica lag” and “lost tail” never shows up.
+- Multiple leaders writing at once. Conflict merge would cover the order path.
+- Implementing Raft in version one. Elections, log matching, and membership changes would cover the business path.

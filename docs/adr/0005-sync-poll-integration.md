@@ -1,36 +1,36 @@
-# ADR 0005：集成使用同步下单和轮询，履约地址可选
+# ADR 0005: Synchronous submit and polling; the fulfillment URL is optional
 
-英文版：[English](../en/adr/0005-sync-poll-integration.md)。
+Chinese: [中文](../../adr/0005-sync-poll-integration.md).
 
-- 状态：已接受
-- 日期：2026-10-10
+- Status: accepted
+- Date: 2026-10-10
 
-## 背景
+## Context
 
-另一个项目需要下单能力，但它的商品、价格和库存规则不属于 OrangeOrder。两边需要一条窄的边界，使 OrangeOrder 可以单独演示，调用方也可以随后接上。
+Another project needs order submission, but its catalog, price, and stock rules do not belong to OrangeOrder. The two sides need a narrow boundary so OrangeOrder can be demonstrated alone and the caller can attach later.
 
-调用方通常希望履约完成后得到通知。第一版若同时做 webhook 注册、签名、重试和退订，集成面会比下单路径还宽。
+Callers usually want a notification when fulfillment finishes. If version one also builds webhook registration, signatures, retries, and unsubscribe, the integration surface becomes wider than the order path.
 
-## 决策
+## Decision
 
-调用方通过网关同步创建订单，并保存 `order_id`。履约是否完成，用 GET 当前快照判断。建议轮询间隔 1 秒。
+The caller creates an order synchronously through the gateway and stores `order_id`. Whether fulfillment is done is decided by GET of the current snapshot. The suggested poll interval is 1 second.
 
-`X-Caller-Id` 只区分租户式的调用方，不是认证。服务只绑定本机回环地址。
+`X-Caller-Id` only distinguishes tenant-style callers. It is not authentication. The service binds only the local loopback address.
 
-`fulfill_url` 可选。提供时，工人向 `http://127.0.0.1` 上的该地址 POST 履约事件，调用方按 `order_id` 去重。不提供时，工人在本地把任务标成完成，OrangeOrder 仍能单独跑通。
+`fulfill_url` is optional. When it is set, the worker POSTs a fulfillment event to that address on `http://127.0.0.1`, and the caller deduplicates by `order_id`. When it is omitted, the worker marks the job done locally, and OrangeOrder can still run by itself.
 
-同一调用方的幂等键相同且正文相同，则不会创建第二笔订单。
+The same caller, the same idempotency key, and the same body do not create a second order.
 
-## 后果
+## Consequences
 
-调用方在集成时不需要长连接，也不需要先实现回调。需要真实履约时，只增加一个本机 HTTP 处理函数。
+Integration does not need a long-lived connection, and the caller does not have to implement a callback first. Real fulfillment adds one local HTTP handler.
 
-没有回调意味着调用方要自己轮询。演示和单机集成里这是可接受的。
+Without a callback, the caller polls. That is acceptable for a demonstration and for single-machine integration.
 
-OrangeOrder 不检查 sku 是否在调用方目录里，因此调用方必须在 POST 之前做完自己的校验。
+OrangeOrder does not check whether `sku` exists in the caller’s catalog, so the caller must finish its own checks before POST.
 
-## 放弃的方案
+## Rejected
 
-- 第一版就做带签名的 webhook。投递状态、失败报警和调用方离线会变成第二个系统。
-- 让调用方直接写 sqlite。那样没有幂等契约、代际和降级，集成也会绑死在表结构上。
-- 把价格和库存放进 OrangeOrder。边界会扩成交易系统，盖过分布式机制这条主线。
+- A signed webhook in version one. Delivery state, failure alarms, and an offline caller become a second system.
+- Letting the caller write sqlite directly. That drops the idempotency contract, the generation, and degradation, and binds integration to the table layout.
+- Putting price and stock inside OrangeOrder. The boundary would grow into a commerce system and cover the distributed-systems line.

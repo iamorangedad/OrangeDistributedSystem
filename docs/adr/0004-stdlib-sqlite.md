@@ -1,43 +1,43 @@
-# ADR 0004：六种实现与 sqlite
+# ADR 0004: Six implementations and sqlite
 
-英文版：[English](../en/adr/0004-stdlib-sqlite.md)。
+Chinese: [中文](../../adr/0004-stdlib-sqlite.md).
 
-- 状态：已接受
-- 日期：2026-10-10，2026-10-21 扩到五种语言，2026-10-23 加上 TypeScript
+- Status: accepted
+- Date: 2026-10-10, extended to five languages on 2026-10-21, TypeScript added on 2026-10-23
 
-## 背景
+## Context
 
-系统要跑在当前这台机器上，方便单步阅读超时、熔断、复制和故障注入。引入 Web 框架、ORM 或容器编排之后，演示故障时要先分辨是业务规则还是框架行为。
+The system runs on this machine so timeouts, the breaker, replication, and fault injection can be read step by step. After a web framework, an ORM, or a container orchestrator is introduced, a demonstrated fault has to be sorted into business rule or framework behavior first.
 
-数据量是演示规模：令牌桶每秒约 10 个请求，任务积压上限 50。
+The data size is a demonstration: about 10 requests per second through the token bucket, and a job backlog cap of 50.
 
-同一份行为后来要用多种语言对照着读。对外契约不能泄漏某一种语言的类型。
+The same behavior is later read across languages. The external contract must not leak one language’s types.
 
-## 决策
+## Decision
 
-六种实现服从同一份端口、错误、日志和验收。每个存储节点一个 sqlite 文件，由该进程用 SQL 访问。复制在应用层按 `replication_log` 推送，不复制数据库文件，也不使用 sqlite 的集群方案。
+Six implementations share the same ports, errors, logs, and acceptance tests. Each store node has one sqlite file, accessed with SQL by that process. Replication pushes `replication_log` at the application layer. It does not copy the database file and does not use a sqlite cluster mode.
 
-进程由监督者直接拉起，不写容器清单。一次只启动一种语言，因为六套都绑定同一组端口。
+The supervisor starts processes directly. There is no container manifest. Only one language runs at a time, because all six bind the same ports.
 
-| 语言 | 进程怎么跑 | HTTP 与 JSON | sqlite |
+| Language | How a process runs | HTTP and JSON | sqlite |
 | --- | --- | --- | --- |
-| Python | `python -m orange.xxx`，标准库 | 标准库 HTTP 与 `json` | 标准库 `sqlite3` |
-| Rust | 一个二进制的子命令，线程，不用异步运行时 | 自己解析的阻塞 HTTP，`serde_json` | `rusqlite`，随二进制带上 sqlite |
-| Java | 同一个 `orange.Main` 的子命令 | JDK 的 `HttpServer`，手写 `Json` | `sqlite-jdbc`，构建时下载，不进版本库 |
-| C++ | 一个二进制的子命令，每个连接一个线程 | POSIX 套接字，手写 JSON | 系统的 `libsqlite3.so.0`，头文件由构建脚本下载 |
-| Go | 一个二进制的子命令，goroutine 加锁 | 标准库 `net/http` | `modernc.org/sqlite`，纯 Go，不使用 cgo |
-| TypeScript | 一个 Node 进程的子命令，事件循环 | 标准库 `node:http`，`JSON` | `better-sqlite3`，安装时编译，不进版本库 |
+| Python | `python -m orange.xxx`, standard library | Standard-library HTTP and `json` | Standard-library `sqlite3` |
+| Rust | Subcommands of one binary, threads, no async runtime | Blocking HTTP parsed in process, `serde_json` | `rusqlite`, sqlite bundled in the binary |
+| Java | Subcommands of the same `orange.Main` | JDK `HttpServer`, hand-written `Json` | `sqlite-jdbc`, downloaded by the build, not committed |
+| C++ | Subcommands of one binary, one thread per connection | POSIX sockets, hand-written JSON | System `libsqlite3.so.0`; the header is downloaded by the build |
+| Go | Subcommands of one binary, goroutines and a lock | Standard-library `net/http` | `modernc.org/sqlite`, pure Go, no cgo |
+| TypeScript | Subcommands of one Node process, the event loop | Standard-library `node:http` and `JSON` | `better-sqlite3`, compiled at install, not committed |
 
-文件对照写在 `python/README.md`、`rust/README.md`、`java/README.md`、`cpp/README.md`、`go/README.md` 和 `ts/README.md`。
+File maps are in `python/README.en.md`, `rust/README.en.md`, `java/README.en.md`, `cpp/README.en.md`, `go/README.en.md`, and `ts/README.en.md`.
 
-## 后果
+## Consequences
 
-机制都在自己的模块里：令牌桶、截止时间、熔断、退避、日志和故障文件。连接处理足够支撑本机演示，不作为性能样本。
+The mechanisms live in the modules themselves: token bucket, deadline, breaker, backoff, logs, and the fault file. Connection handling is enough for a local demonstration. It is not a performance sample.
 
-调用方只看 OpenAPI 和 [技术方案](../technical-design.md) 里的故障行为。换一种语言启动，请求和响应不变。
+Callers read OpenAPI and the fault behavior in the [technical design](../technical-design.md). Starting a different language does not change the request or the response.
 
-## 放弃的方案
+## Rejected
 
-- 用现成的网关和数据库集群充当「分布式」。能跑起来，但超时、代际和任务领取都看不见。
-- 第一版上 Kubernetes。副本、探针和扩缩容会变成集群配置，而不是这段代码里的规则。
-- 只保留一种语言。对照着读时，看不出同一条规则在不同运行时里落在哪一个文件。
+- Treating an off-the-shelf gateway and database cluster as “distributed.” It runs, but timeouts, generations, and job claims are invisible.
+- Putting version one on Kubernetes. Replicas, probes, and scaling would become cluster configuration instead of rules in this code.
+- Keeping only one language. A side-by-side reading would not show which file holds the same rule in another runtime.

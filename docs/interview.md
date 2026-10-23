@@ -1,91 +1,91 @@
-# 面试讲解：如何设计一个分布式系统
+# Interview walkthrough: designing a distributed system
 
-英文版：[Interview walkthrough](en/interview.md)。
+Chinese: [面试讲解](../interview.md).
 
-| 项 | 值 |
+| Item | Value |
 | --- | --- |
-| 状态 | 讲解稿。行为、参数和接口以设计文档为准 |
-| 版本 | 0.1 |
-| 日期 | 2026-10-14 |
+| Status | A talk track. Behavior, parameters, and interfaces follow the design documents |
+| Version | 0.1 |
+| Date | 2026-10-14 |
 
-本文说明如何用 OrangeOrder 回答「如何设计一个分布式系统」。它不是第二份规格。参数、故障细则和验收以 [技术方案](technical-design.md) 为准，结构以 [架构设计](architecture.md) 为准，取舍理由在 [决策记录](adr/)。
+This note shows how to answer “design a distributed system” with OrangeOrder. It is not a second specification. Parameters, fault details, and acceptance follow the [technical design](technical-design.md). Structure follows the [architecture](architecture.md). The reasons are in the [ADRs](adr/).
 
-面试考的是先划边界，再把失败时的行为说死。OrangeOrder 是一台机器上的多进程下单系统，把幂等、降级、异步履约、单主切换和按积压伸缩做成了可演示、可追问的规则。
+The interview tests whether you draw the boundary first and then make failure behavior definite. OrangeOrder is a multi-process order system on one machine. Idempotency, degradation, asynchronous fulfillment, single-leader failover, and scaling by backlog are rules that can be demonstrated and questioned.
 
-## 开场
+## Opening
 
-用大约三十秒把范围说完，再让对方挑一条往下钻：
+Spend about thirty seconds on the scope, then let the other person pick a line:
 
-> 我做的是一个下单系统。调用方管商品、价格和库存，我只负责接单、落库、可选推荐、异步履约，以及主存储挂掉之后的切换。对外只有两个接口：`POST /v1/orders` 和 `GET /v1/orders/{id}`。调用方只打网关 `127.0.0.1:8080`。
+> I built an order system. The caller owns catalog, price, and stock. I only accept the order, persist it, optionally recommend, fulfill asynchronously, and fail over when the leader store dies. There are two external APIs: `POST /v1/orders` and `GET /v1/orders/{id}`. The caller talks only to the gateway at `127.0.0.1:8080`.
 >
-> 写路径是：网关做限流和截止时间，轮询两个无状态的订单进程，订单进程把订单和履约任务在主存储的同一个事务里提交，`fsync` 之后才返回 201。推荐是旁路，失败就降级成功。工人稍后向主存储领任务去履约。监督者负责探活、公布当前主地址、故障转移和加减工人。
+> The write path is: the gateway applies a rate limit and a deadline, then round-robins two stateless order processes. The order process commits the order and the fulfillment job in one transaction on the leader store, and returns 201 only after `fsync`. Recommendation is a side path. If it fails, the order still succeeds and is marked degraded. A worker later claims the job from the leader and fulfills it. The supervisor probes, publishes the current leader, fails over, and adds or removes workers.
 >
-> 我刻意没做 Raft、多主、独立消息队列和跨机房多活。要讲的是：单主异步复制时，分区到底牺牲什么。
+> I deliberately skipped Raft, multi-leader, a separate message queue, and multi-region active-active. The point is what a partition costs under single-leader asynchronous replication.
 
-这句话把范围、写路径和取舍一次说完。下面六问是通常会被挑下去的点。
+That sentence covers scope, the write path, and the tradeoff. The six questions below are the usual follow-ups.
 
-## 六问
+## Six questions
 
-### 同一个请求重试，会不会产生两张订单？
+### If the same request is retried, do we get two orders?
 
-幂等键是 `caller_id + idempotency_key`，唯一约束在订单行上，不另建表。同一把钥匙、正文相同，直接返回第一次的响应快照，不再写存储，也不再问推荐。正文不同返回 `409 idempotency_mismatch`，原订单不动。
+The idempotency key is `caller_id + idempotency_key`, with a unique constraint on the order row. There is no extra table. The same key and the same body return the first response snapshot, without another store write and without another recommendation call. A different body returns `409 idempotency_mismatch` and leaves the original order alone.
 
-正文摘要只比较 `sku`、`qty`、`external_ref`、`fulfill_url` 四个字段的规范 JSON。`order_id`、商品和数量在重放时不变。履约状态可以前进，所以「不产生第二笔订单」和「快照永远停在第一次」是两件事。
+The body digest compares the canonical JSON of `sku`, `qty`, `external_ref`, and `fulfill_url`. `order_id`, the item, and the quantity do not change on replay. Fulfillment status may advance. “No second order” and “the snapshot is frozen at the first response” are two different statements.
 
-### 推荐挂了，下单还成功吗？
+### If recommendation is down, does the order still succeed?
 
-成功，而且必须告诉调用方这是降级的。订单进程并行做两件事：写主存储，以及最多等推荐 80ms。存储失败则整单失败，推荐结果丢掉。存储成功而推荐超时，则 `201`，`degraded=true`，`recommendation` 为空。
+Yes, and the caller must be told it is degraded. The order process does two things in parallel: write the leader store, and wait at most 80ms for recommendation. If the store fails, the whole order fails and the recommendation is discarded. If the store succeeds and recommendation times out, the result is `201`, `degraded=true`, and an empty `recommendation`.
 
-每个订单进程有自己的熔断器：10 秒内失败 5 次就打开，打开 5 秒后放一次探测。打开期间不再连接推荐，直接降级。两个副本的熔断器不共享。共享熔断器要另做一份状态，第一版不值得。
+Each order process has its own breaker: 5 failures within 10 seconds open it, and after 5 seconds it allows one probe. While open, it does not connect to recommendation and degrades directly. The two replicas do not share a breaker. A shared breaker would be another piece of state, and version one does not add it.
 
-### 履约为什么不放在下单响应里？工人崩了任务还在吗？
+### Why is fulfillment not in the order response? If the worker crashes, is the job still there?
 
-接单和履约拆开。订单行、任务行和一条 `order_created` 日志在同一个 sqlite 事务里提交，避免订单确认了但任务丢了。任务表就是队列，不另起消息中间件。见 [ADR 0002](adr/0002-job-table.md)。
+Acceptance and fulfillment are split. The order row, the job row, and one `order_created` log entry commit in one sqlite transaction, so a confirmed order cannot lose its job. The job table is the queue. There is no separate broker. See [ADR 0002](adr/0002-job-table.md).
 
-工人领取时把任务改成 `inflight`，`visible_after` 设为 15 秒后。工人在确认之前崩溃，超时后任务回到 `pending`，别人可以再领。所以这是至少一次，履约端必须按 `order_id` 幂等。失败按指数退避加全抖动重试，第 5 次进入死信，订单变为 `fulfillment_failed`。没有单独的死信进程。
+On claim, the job becomes `inflight` and `visible_after` is 15 seconds later. If the worker crashes before ack, the job returns to `pending` after the timeout and someone else can claim it. That is at-least-once, so the fulfillment endpoint must be idempotent on `order_id`. Failures retry with exponential backoff and full jitter. The fifth attempt becomes a dead letter and the order becomes `fulfillment_failed`. There is no separate dead-letter process.
 
-积压到 50，网关对新单返回 429，已经接受的订单继续履约。队列负责削峰，不负责无限接收。
+At 50 pending jobs, the gateway returns 429 for new orders. Orders already accepted keep being fulfilled. The queue absorbs bursts. It does not accept without bound.
 
-### 主存储没了怎么办？会不会两个进程同时写？
+### What if the leader store is gone? Can two processes write at once?
 
-任意时刻只有一个主可以确认写入。主和从每 200ms 向监督者心跳。主心跳中断超过 1 秒，且从还活着，监督者才把从提升为 `epoch + 1`。从存储先把新 epoch `fsync` 进自己的库，才开始接写。旧 epoch 的写入一律 `409 epoch_fenced`。订单进程向监督者要一次新地址，用同一把幂等键再试。
+Only one leader may confirm a write at a time. Leader and follower heartbeat the supervisor every 200ms. If the leader heartbeat is missing for more than 1 second and the follower is still alive, the supervisor promotes the follower to `epoch + 1`. The follower fsyncs the new epoch into its own database before it accepts writes. Writes from the old epoch get `409 epoch_fenced`. The order process asks the supervisor for the new address once and retries with the same idempotency key.
 
-监督者是唯一见证人。两个存储节点不因为对方心跳消失就自己升主，否则网络一断就会双主。监督者自己挂了，不选新主，现任主继续服务。监督者和主先后都失效时，系统停止接单。这里的选择是：不要出现两个写入者，可用性让位。见 [ADR 0001](adr/0001-single-leader.md) 和 [ADR 0003](adr/0003-supervisor-witness.md)。
+The supervisor is the only witness. The two store nodes do not promote themselves when the other heartbeat disappears, or a network break would create two leaders. If the supervisor itself is down, it does not elect a new leader and the current leader keeps serving. If the supervisor and the leader both fail, the system stops accepting orders. The choice is: do not have two writers, and let availability yield. See [ADR 0001](adr/0001-single-leader.md) and [ADR 0003](adr/0003-supervisor-witness.md).
 
-切换开始时网关暂停新单，最多 2 秒，避免切换瞬间写到旧主。暂停期间调用方看到 503，用同一把钥匙重试。
+When the switch starts, the gateway pauses new orders for at most 2 seconds so a write does not hit the old leader in that instant. During the pause the caller sees 503 and retries with the same key.
 
-### 收到 201 之后，这笔订单还可能查不到吗？
+### After a 201, can this order still be missing?
 
-会。复制是异步的，不阻塞已经返回的确认。从存储只接受连续的 `log_index`。主在复制前消失，尚未推送的尾部留在旧文件里，不会自动合并进新主。调用方用同一幂等键再 POST 就能补上。
+Yes. Replication is asynchronous and does not block the confirmation already returned. The follower accepts only a contiguous `log_index`. If the leader disappears before replication, the unpushed tail stays in the old file and is not merged into the new leader. The caller POSTs again with the same idempotency key.
 
-这是用一段丢失窗口换来的可用性：从存储停机时，主存储仍然能接单。读自己的写入走当前主，从存储不对外提供读。若同步等从库确认再返回 201，从库一停就无法下单，就看不到「副本落后」和「尾部丢失」的差别。
+That loss window is the price of availability: when the follower is down, the leader can still take orders. Read-your-writes goes to the current leader. The follower does not serve reads. If 201 waited for the follower to confirm, a stopped follower would stop orders, and the difference between “replica lag” and “lost tail” would disappear.
 
-### 流量上来了怎么扩，保护线在哪？
+### When traffic rises, what scales, and where is the protection line?
 
-订单副本固定 2 个。这是容错：一个副本退出，另一个继续接单，监督者再把它拉起来。伸缩只加在工人上。`pending` 大于 10 持续 5 秒就加一个工人，最多 3 个。积压为 0 持续 20 秒就收回，最少留 1 个。冷却 15 秒，按方向分开算，避免刚加完就减。不按 CPU 或单次延迟扩缩。
+Order replicas are fixed at 2. That is resilience: one replica exits, the other keeps accepting, and the supervisor starts the failed one again. Scaling applies only to workers. `pending` above 10 for 5 seconds adds one worker, up to 3. A backlog of 0 for 20 seconds scales back in, leaving at least 1. The cooldown is 15 seconds, counted separately in each direction, so a worker just added is not immediately removed. Scaling does not use CPU or a single latency sample.
 
-网关还有三道背压：令牌桶每秒补充 10 个、容量 30；在途下单不超过 8；待处理任务达到 50。超了都是 429。网关在转发前写下绝对截止时间，默认从现在起 800ms。订单进程把剩余时间再封顶为 400ms 交给存储。超时返回 504，不再发起新的下游调用。
+The gateway also has three backpressure gates: a token bucket that refills 10 per second with capacity 30; at most 8 in-flight orders; pending jobs at 50. All three return 429. Before forwarding, the gateway writes an absolute deadline, 800ms from now by default. The order process caps the remaining time at 400ms for the store. A timeout returns 504 and starts no new downstream call.
 
-## 一次请求怎么被串起来
+## How one request is tied together
 
-网关写入 `X-Request-Id` 和 `X-Deadline-Ms`。同一条 `request_id` 出现在网关、订单和存储的 JSON 日志里。监督者的 `GET /v1/status` 给出当前主地址、epoch、两边的 `applied_index`、工人数量和最近一次切换错误。
+The gateway writes `X-Request-Id` and `X-Deadline-Ms`. The same `request_id` appears in the JSON logs of the gateway, the order process, and the store. The supervisor’s `GET /v1/status` reports the current leader address, epoch, both `applied_index` values, the worker count, and the last promotion error.
 
-故障用 `runtime/faults.json` 注入：让推荐变慢、暂停复制、丢掉某个存储的心跳。切换演示用停心跳，不删 sqlite 文件。
+Faults are injected with `runtime/faults.json`: slow down recommendation, pause replication, or drop one store’s heartbeat. The failover demo stops the heartbeat. It does not delete the sqlite file.
 
-若对方要求演示，这三条足够：
+If the other person wants a demo, these three are enough:
 
-| 操作 | 对外结果 | 说明的机制 |
+| Action | External result | Mechanism |
 | --- | --- | --- |
-| 同一把钥匙 POST 两次 | 同一个 `order_id`，都是 201 | 幂等 |
-| 停掉推荐 | 201，`degraded=true` | 旁路失败不拖垮主路径 |
-| 主存储停止心跳 | 从存储以更大 epoch 接写，旧 epoch 被拒绝 | 见证人加 fencing |
+| POST twice with the same key | The same `order_id`, both 201 | Idempotency |
+| Stop recommendation | 201, `degraded=true` | A side-path failure does not sink the main path |
+| Stop the leader heartbeat | The follower accepts writes at a higher epoch; the old epoch is rejected | Witness plus fencing |
 
-完整验收是技术方案里的 AC-1 到 AC-12。
+The full acceptance set is AC-1 through AC-12 in the technical design.
 
-## 守住的边界
+## Boundaries to hold
 
-讲的时候守住三条，避免把演示说成生产方案：
+Hold three lines so the demonstration is not described as a production plan:
 
-1. 这是单机多进程，用来把超时、代际和任务领取放在自己的代码里。它不是性能样本，也不是生产多活方案。
-2. 一致性说清楚：单写入者，异步副本，故障转移可能丢未复制的尾部，调用方靠幂等键补写。不要把它说成强一致或 Raft。
-3. 每个数字都有理由，而且写在技术方案的参数表里：推荐 80ms、可见性 15 秒、失联判定 1 秒、积压保护线 50。对方改一个约束，就改这条规则的后果，而不是再堆一个组件。
+1. This is multi-process on one machine, so timeouts, generations, and job claims live in the code. It is not a performance sample and not a production active-active design.
+2. State the consistency plainly: one writer, an asynchronous replica, failover can lose the unreplicated tail, and the caller fills it back with the idempotency key. Do not call it strong consistency or Raft.
+3. Every number has a reason, and the reason is the parameter table: recommendation 80ms, visibility 15 seconds, leader loss at 1 second, backlog protection at 50. If the other person changes a constraint, change the consequence of that rule instead of adding another component.

@@ -1,178 +1,178 @@
-# 需求与变更记录
+# Requirements history
 
-英文版：[Requirements history](en/requirements-history.md)。
+Chinese: [需求与变更记录](../requirements-history.md).
 
-| 项 | 值 |
+| Item | Value |
 | --- | --- |
-| 状态 | 历史记录。现行规格以设计文档为准，不以本文的早期方案为准 |
-| 版本 | 0.1 |
-| 日期 | 2026-10-11 |
-| 来源 | 2026-10-10 上传的《如何设计一个弹性分布式系统》对照表，以及同日的 Elastic System Review 画布 |
+| Status | History. The current specification is the design documents, not the early plans in this file |
+| Version | 0.1 |
+| Date | 2026-10-11 |
+| Source | The 2026-10-10 checklist “how to design an elastic distributed system,” and the Elastic System Review canvas from the same day |
 
-Elastic System Review 最初只放在对话旁的画布里，没有进入仓库。本文把它收成需求历史：先记下原始表，再记下评审对表做了什么，最后记下设计文档相对那次评审又改了什么。
+The Elastic System Review first lived only in a canvas beside the chat. It was not in the repository. This file turns it into requirements history: the original table, what the review did to that table, and what the design documents changed after the review.
 
-现行行为、参数和接口以 [系统概述](overview.md)、[技术方案](technical-design.md) 和 [集成指南](integration.md) 为准。
+Current behavior, parameters, and interfaces follow the [overview](overview.md), the [technical design](technical-design.md), and the [integration guide](integration.md).
 
-## 原始需求
+## Original requirements
 
-2026-10-10，项目尚无代码。输入是一张弹性分布式系统对照表，目标是自学，并要求最小化，同时把主要机制都留住。
+On 2026-10-10 the project had no code. The input was an elasticity checklist. The goal was self-study, kept small, while retaining the main mechanisms.
 
-| 编号 | 分组 | 原始要求 |
+| Id | Group | Original requirement |
 | --- | --- | --- |
-| R0-1 | 原则 | 弹性有两层含义。Resilience：部分节点故障、网络分区、下游崩溃时仍持续提供服务，并允许优雅降级 |
-| R0-2 | 原则 | Elasticity：流量突增或波动时按需横向扩缩容 |
-| R0-3 | 接入 | 智能负载均衡和全局限流。边缘 CDN 与智能网关（举例为 Envoy、Azure Front Door）。令牌桶或漏桶，防止流量击垮后端 |
-| R0-4 | 计算 | 业务彻底解耦为无状态应用。用 Kubernetes HPA，按 CPU、内存或自定义请求延迟做毫秒到秒级扩缩容 |
-| R0-5 | 通信 | 用消息队列（举例为 Kafka、Event Hubs）削峰。RPC 必须配置超时，以及带抖动的指数退避，防止重试风暴 |
-| R0-6 | 隔离 | 熔断：下游连续异常时熔断，并返回预设或兜底响应 |
-| R0-7 | 隔离 | 舱壁：隔离关键与非关键业务的线程池或资源池 |
-| R0-8 | 隔离 | 降级：保住核心链路。举例为允许支付，暂时关闭非核心推荐 |
-| R0-9 | 存储 | 跨可用区与跨地域部署。读写分离与多副本。按业务在 Raft/Paxos 强一致和 CQRS 加最终一致之间权衡。要能容忍分区 |
-| R0-10 | 观测 | 统一指标、日志和分布式追踪（举例为 OpenTelemetry）。为 SLI/SLO 配置自动警报 |
-| R0-11 | 混沌 | 在预发或生产注入故障（举例为 Chaos Studio：断网、杀 Pod、数据库高延迟），在事故前验证弹性和自愈 |
-| R0-12 | 自愈 | 存活探针与就绪探针、死信重试、自动故障转移 |
+| R0-1 | Principle | Elasticity has two meanings. Resilience: keep serving when some nodes fail, the network partitions, or a downstream crashes, and allow graceful degradation |
+| R0-2 | Principle | Elasticity: scale out and in with traffic spikes or swings |
+| R0-3 | Ingress | Smart load balancing and a global rate limit. Edge CDN and a smart gateway (examples: Envoy, Azure Front Door). Token bucket or leaky bucket, so traffic does not crush the backend |
+| R0-4 | Compute | Split the business into stateless applications. Use Kubernetes HPA, scaling in milliseconds to seconds by CPU, memory, or custom request latency |
+| R0-5 | Communication | Use a message queue (examples: Kafka, Event Hubs) to absorb bursts. RPC must set a timeout and exponential backoff with jitter, to avoid a retry storm |
+| R0-6 | Isolation | Breaker: when a downstream fails continuously, open the breaker and return a preset or fallback response |
+| R0-7 | Isolation | Bulkhead: isolate thread pools or resource pools of critical and non-critical work |
+| R0-8 | Isolation | Degradation: protect the core path. Example: allow payment, temporarily turn off non-core recommendation |
+| R0-9 | Storage | Deploy across availability zones and regions. Read/write split and multiple replicas. Choose, per business, between Raft/Paxos strong consistency and CQRS plus eventual consistency. Tolerate partitions |
+| R0-10 | Observation | Unified metrics, logs, and distributed tracing (example: OpenTelemetry). Automatic alerts for SLI/SLO |
+| R0-11 | Chaos | Inject faults in staging or production (example: Chaos Studio: cut the network, kill pods, high database latency) and verify elasticity and self-healing before an incident |
+| R0-12 | Self-healing | Liveness and readiness probes, dead-letter retry, automatic failover |
 
-## 变更 CHG-1：评审画布
+## Change CHG-1: review canvas
 
-日期：2026-10-10。记录名：Elastic System Review。
+Date: 2026-10-10. Record name: Elastic System Review.
 
-判定只针对自学第一版，不评价这些产品在生产里是否有用。10 条里 3 条采纳，6 条收窄，1 条重写。
+The judgment is only for a self-study first version. It does not say whether those products are useful in production. Of 10 rows, 3 were adopted, 6 narrowed, and 1 rewritten.
 
-结论：弹性拆成容错和伸缩，这一步成立。存储那一行把单主复制、多主、Raft/Paxos、CQRS 写成可以一起上的清单，第一版必须改成一种写入规则。其余机制成立，落地时用进程、表和故障开关代替 CDN、Kafka、Kubernetes 和混沌平台。业务收成一台机器上的多进程下单系统，名称定为 Orange。支付、库存和账户不做。推荐是可失败旁路，履约是事后副作用。
+Conclusion: splitting elasticity into resilience and elasticity holds. The storage row listed single-leader replication, multi-leader, Raft/Paxos, and CQRS as a menu that could all be turned on. Version one had to become one write rule. The other mechanisms hold. In the implementation, processes, tables, and a fault switch replace CDN, Kafka, Kubernetes, and a chaos platform. The business is a multi-process order system on one machine, named Orange. Payment, stock, and accounts are out. Recommendation is a side path that may fail. Fulfillment is a later side effect.
 
-| 编号 | 对应原始需求 | 判定 | 评审后的处理 |
+| Id | Original | Judgment | After the review |
 | --- | --- | --- | --- |
-| R1-1 | R0-1 | 采纳 | 节点崩溃、调用变慢、副本断开时，核心写路径仍要有确定结果 |
-| R1-2 | R0-2 | 采纳 | 副本数随任务积压变化，并设冷却时间 |
-| R1-3 | R0-3 | 收窄 | 保留单一入口和令牌桶。只有一台网关时，本地桶就是全局限流 |
-| R1-4 | R0-4 | 收窄 | 订单进程不保存业务状态。伸缩信号用积压秒数，不用瞬时延迟 |
-| R1-5 | R0-5 | 收窄 | 截止时间沿调用传递。重试只留给可重试的副作用，并且先有幂等键 |
-| R1-6 | R0-6、R0-7、R0-8 | 收窄 | 熔断只包推荐。写入失败就返回错误，不用预设成功当兜底 |
-| R1-7 | R0-9 | 重写 | 单主、多主、共识、读写模型分离是四条路。第一版只保留单主和 epoch |
-| R1-8 | R0-10 | 收窄 | 用 request_id 串起一次请求，并露出积压、错误、复制滞后、熔断状态 |
-| R1-9 | R0-11 | 收窄 | 故障开关放在本机实验里，用来核对约定行为 |
-| R1-10 | R0-12 | 采纳 | 分开存活探针和就绪探针。死信、进程拉起、带隔离的故障转移都留下 |
+| R1-1 | R0-1 | Adopt | When a node crashes, a call slows, or a replica disconnects, the core write path still has a definite result |
+| R1-2 | R0-2 | Adopt | Replica count follows job backlog, with a cooldown |
+| R1-3 | R0-3 | Narrow | Keep one entrance and a token bucket. With one gateway, the local bucket is the global limit |
+| R1-4 | R0-4 | Narrow | Order processes do not store business state. The scale signal is seconds of backlog, not an instantaneous latency |
+| R1-5 | R0-5 | Narrow | A deadline is passed along the call. Retries are only for retryable side effects, and only after an idempotency key exists |
+| R1-6 | R0-6, R0-7, R0-8 | Narrow | The breaker wraps only recommendation. A failed write returns an error. A preset success is not a fallback |
+| R1-7 | R0-9 | Rewrite | Single leader, multi-leader, consensus, and a split read model are four roads. Version one keeps only a single leader and an epoch |
+| R1-8 | R0-10 | Narrow | Tie one request together with request_id, and expose backlog, errors, replication lag, and breaker state |
+| R1-9 | R0-11 | Narrow | The fault switch lives in a local experiment, to check the agreed behavior |
+| R1-10 | R0-12 | Adopt | Separate liveness and readiness. Dead letter, process restart, and fenced failover all stay |
 
-评审补上了原表没有、但缺了就不完整的四条：
+The review added four items the original table did not have, without which the design is incomplete:
 
-| 编号 | 补充需求 |
+| Id | Added requirement |
 | --- | --- |
-| R1-11 | 幂等键。否则重试和故障转移会把同一张订单写两次 |
-| R1-12 | 沿调用传递的截止时间。每个调用单独设超时，总等待仍可能把入口拖死 |
-| R1-13 | 有界积压。队列只负责削峰，越过上限就拒绝新请求 |
-| R1-14 | 写入隔离。旧主恢复后必须能被新的 epoch 拒绝 |
+| R1-11 | An idempotency key. Otherwise retry and failover write the same order twice |
+| R1-12 | A deadline passed along the call. If each call sets its own timeout, the total wait can still stall the entrance |
+| R1-13 | A bounded backlog. The queue only absorbs bursts. Past the cap, new requests are rejected |
+| R1-14 | Write fencing. After the old leader returns, the new epoch must be able to reject it |
 
-评审明确不照做的内容：用瞬时延迟做毫秒级扩容；下游一异常就返回预设成功；跨地域多活和多主；在预发或生产注入故障。
+The review explicitly did not copy: millisecond scaling from instantaneous latency; returning a preset success whenever a downstream looks wrong; multi-region active-active and multi-leader; injecting faults in staging or production.
 
-评审当时形成的方案，后来有一部分被 CHG-2 改掉。下面按画布原文留下，方便对照。
+Part of the plan formed in the review was later changed by CHG-2. The canvas text is kept below for comparison.
 
-数据路径：客户端 → 网关 → 订单副本 → 主存储 → 从存储。推荐从订单旁路出去，可以失败。工人向主存储领取任务。监督者探活、拉起、公布主节点、按积压加减工人，不在写入确认路径上。
+Data path: client → gateway → order replica → leader store → follower store. Recommendation leaves from the order process and may fail. Workers claim jobs from the leader store. The supervisor probes, restarts, publishes the leader, and adds or removes workers by backlog. It is not on the write-confirmation path.
 
-写入规则：只有监督者公布的当前主节点接受写入。订单和任务行同一次提交并 fsync。从节点可以落后。读自己的写入走主节点。故障转移时从节点先写下新 epoch 再接写。监督者停掉时，当前主节点继续服务，不自动另选主。
+Write rules: only the current leader published by the supervisor accepts writes. The order row and the job row commit together and fsync. The follower may lag. Read-your-writes goes to the leader. On failover the follower writes the new epoch before it accepts writes. If the supervisor stops, the current leader keeps serving and does not elect another leader by itself.
 
-副作用规则：任务表就是队列。领取后有可见性超时，再次领取必须按任务号幂等。连续失败进入死信。积压超过上限时，网关对新订单返回 429。
+Side-effect rules: the job table is the queue. After a claim there is a visibility timeout, and a later claim must be idempotent on the job id. Repeated failure becomes a dead letter. When the backlog passes the cap, the gateway returns 429 for new orders.
 
-| 进程 | 评审当时写的数量 | 职责 | 停掉之后 |
+| Process | Count written in the review | Duty | After it stops |
 | --- | --- | --- | --- |
-| 网关 | 1 | 令牌桶、截止时间、跳过未就绪副本 | 入口中断，监督者拉起 |
-| 订单 | 2，最多 3 | 校验幂等键，写主存储，短等推荐 | 网关摘掉该副本 |
-| 推荐 | 1 | 可有可无的推荐 | 订单仍成功，并标上降级 |
-| 工人 | 1–3 | 领取履约任务，失败则退避 | 任务超时后回到待领取 |
-| 主存储 | 1 | 唯一写入者 | 监督者提升从节点并更换 epoch |
-| 从存储 | 1 | 接收已确认日志 | 失去滞后副本，写入仍在主节点 |
-| 监督者 | 1 | 探活、拉起、公布主节点、按积压加减工人 | 停止选主和伸缩，现任主节点继续写 |
+| Gateway | 1 | Token bucket, deadline, skip a replica that is not ready | Entrance stops; the supervisor starts it |
+| Order | 2, at most 3 | Check the idempotency key, write the leader, wait briefly for recommendation | The gateway removes that replica |
+| Recommender | 1 | A recommendation that may be absent | The order still succeeds and is marked degraded |
+| Worker | 1–3 | Claim fulfillment jobs; back off on failure | After timeout the job returns to pending |
+| Leader store | 1 | The only writer | The supervisor promotes the follower and changes the epoch |
+| Follower store | 1 | Receive confirmed log entries | The lagging replica is gone; writes stay on the leader |
+| Supervisor | 1 | Probe, restart, publish the leader, scale workers by backlog | Election and scaling stop; the current leader keeps writing |
 
-评审要求第一版必须能演示的行为：
+Behaviors the review required version one to demonstrate:
 
-| 编号 | 注入的故障 | 约定的结果 |
+| Id | Injected fault | Agreed result |
 | --- | --- | --- |
-| R1-15 | 杀掉一个订单进程 | 另一副本继续接单，监督者把它拉起来 |
-| R1-16 | 推荐延迟或退出 | 最多等待 80ms，推荐为空，degraded 为真 |
-| R1-17 | 主存储退出 | 从节点以新 epoch 接写；旧主恢复后写入被拒绝 |
-| R1-18 | 工人在处理中退出 | 可见性超时后任务可被再次领取，只生效一次 |
-| R1-19 | 同一幂等键再提交 | 返回第一次的结果，不产生第二张订单 |
-| R1-20 | 请求超过截止时间 | 订单进程停止调用下游，向网关返回超时 |
-| R1-21 | 待处理任务持续堆积 | 先加工人，直到 3 个；仍超过上限则新订单得到 429 |
-| R1-22 | 毒任务反复失败 | 到达次数上限后进入死信 |
+| R1-15 | Kill one order process | The other replica keeps accepting; the supervisor starts it again |
+| R1-16 | Recommendation is slow or exits | Wait at most 80ms; recommendation is empty; degraded is true |
+| R1-17 | Leader store exits | The follower accepts writes at a new epoch; after the old leader returns, its writes are rejected |
+| R1-18 | A worker exits mid-job | After the visibility timeout the job can be claimed again, and it takes effect once |
+| R1-19 | Submit the same idempotency key again | Return the first result; do not create a second order |
+| R1-20 | The request passes the deadline | The order process stops calling downstream and returns a timeout to the gateway |
+| R1-21 | Pending jobs keep piling up | Add workers first, up to 3; if still over the cap, new orders get 429 |
+| R1-22 | A poison job fails repeatedly | After the attempt limit it becomes a dead letter |
 
-评审给出的对应关系和参数：
+Correspondences and parameters from the review:
 
-| 原表说法 | 评审当时的对应物 |
+| Original wording | What the review mapped it to |
 | --- | --- |
-| 边缘网关与全局限流 | 一个网关进程，令牌桶容量 30、每秒补充 10 |
-| 无状态与横向伸缩 | 订单进程可替换；工人数由积压决定，冷却 15 秒 |
-| 消息队列削峰 | 任务表：有上限、可见性超时 15 秒、死信 |
-| 超时与指数退避 | 入口截止时间 800ms；工人重试 100ms 起、封顶 5 秒、全抖动 |
-| 熔断、舱壁、降级 | 推荐连续失败 5 次后打开 5 秒；网关最多 8 个在途下单 |
-| 复制与分区取舍 | 单主 fsync 后确认，从节点可滞后；分区时宁可暂停选主 |
-| 指标、日志、追踪 | JSON 日志带 request_id；积压、错误、滞后、熔断四个计数 |
-| 混沌与自愈 | `runtime/faults.json` 注入延迟、退出和暂停复制；存活与就绪分开 |
+| Edge gateway and a global rate limit | One gateway process, token bucket capacity 30, refill 10 per second |
+| Stateless and horizontal scale | Order processes are replaceable; worker count follows backlog, cooldown 15 seconds |
+| Message queue absorbs bursts | Job table: a cap, visibility timeout 15 seconds, dead letter |
+| Timeout and exponential backoff | Entrance deadline 800ms; worker retry starts at 100ms, caps at 5 seconds, full jitter |
+| Breaker, bulkhead, degradation | Recommendation opens for 5 seconds after 5 consecutive failures; the gateway allows at most 8 in-flight orders |
+| Replication and partition tradeoff | Confirm after the leader fsync; the follower may lag; during a partition, prefer not to elect |
+| Metrics, logs, tracing | JSON logs carry request_id; four counters: backlog, errors, lag, breaker |
+| Chaos and self-healing | `runtime/faults.json` injects delay, exit, and paused replication; liveness and readiness are separate |
 
-实现顺序定为七段：单进程幂等，网关与两个副本，推荐与熔断，任务表与死信，主从与 epoch，按积压加减工人，故障文件与四个计数。第一版不包含跨地域多活、多主、CQRS、Raft/Paxos、Kafka、Kubernetes、Envoy、CDN、OpenTelemetry Collector、托管混沌平台，以及按 CPU 或延迟自动扩缩。Raft 留到单主转移能演示之后再作为单独练习。
+The implementation order was seven stages: single-process idempotency, gateway and two replicas, recommendation and breaker, job table and dead letter, leader/follower and epoch, add and remove workers by backlog, fault file and the four counters. Version one does not include multi-region active-active, multi-leader, CQRS, Raft/Paxos, Kafka, Kubernetes, Envoy, CDN, an OpenTelemetry Collector, a hosted chaos platform, or autoscaling by CPU or latency. Raft waits until single-leader failover can be demonstrated, and then it is a separate exercise.
 
-当天的实现约定是：进程由监督者拉起，每个存储节点一个 sqlite 文件。语言当时只写了 Python。同一份契约后来又有 Rust、Java、C++ 和 Go，见文末 CHG-3。
+The agreement that day was: the supervisor starts the processes, and each store node has one sqlite file. The only language written then was Python. The same contract later gained Rust, Java, C++, and Go. See CHG-3 at the end.
 
-## 变更 CHG-2：设计文档相对评审画布
+## Change CHG-2: design documents relative to the review canvas
 
-日期：2026-10-10 晚些时候。触发原因有两件：另一个项目需要把 OrangeOrder 当成下单入口集成；把画布收成可实现的设计时，有几处数量和语义必须写死。
+Date: later on 2026-10-10. Two triggers: another project needed OrangeOrder as an order entrance; turning the canvas into an implementable design required a few counts and semantics to be fixed.
 
-这次变更不推翻 CHG-1 的判定。下面只列相对画布改动的需求。
+This change does not overturn the judgments in CHG-1. The rows below are only the requirements that moved relative to the canvas.
 
-| 编号 | 相对画布 | 变更后的需求 | 落在哪 |
+| Id | Relative to the canvas | Requirement after the change | Where it landed |
 | --- | --- | --- | --- |
-| R2-1 | 画布只说客户端下单，没有外部系统边界 | 调用方拥有商品、价格、库存和购物车。OrangeOrder 不解释 sku，也不保存金额 | [系统概述](overview.md)、[集成指南](integration.md) |
-| R2-2 | 画布没有调用方身份 | 每个请求带 `X-Caller-Id`。幂等键的范围是同一个调用方 | [接口说明](api.md) |
-| R2-3 | 画布没有调用方单号和履约地址 | 增加可选的 `external_ref`。`fulfill_url` 可选，且只允许 `http://127.0.0.1`。不提供时工人在本地把任务标成完成 | [ADR 0005](adr/0005-sync-poll-integration.md) |
-| R2-4 | 画布没有查询方式 | 履约进展用 GET 轮询，第一版不做 webhook | [集成指南](integration.md) |
-| R2-5 | R1-2、进程表写订单「2，最多 3」，伸缩对象含糊 | 订单副本固定为 2，只用于容错。自动加减的只有工人，范围 1 到 3 | [技术方案](technical-design.md) |
-| R2-6 | R1-19 写「返回第一次的结果」 | 同一钥匙不创建第二笔订单。重放返回当前快照，履约状态可以已经前进；商品、数量和 `external_ref` 不变 | [数据模型](data-model.md) |
-| R2-7 | R1-13、R1-21 只说积压超过上限 | 待处理任务大于 10 且持续 5 秒才加一个工人。积压达到 50 时新单返回 429。积压为 0 持续 20 秒才收回多余工人。冷却 15 秒 | [技术方案](technical-design.md) |
-| R2-8 | 观测写四个计数 | 必看指标为五项：错误数、在途数、待处理任务、复制滞后、熔断是否打开 | [技术方案](technical-design.md) |
-| R2-9 | 工人在画布里没有端口 | 工人从 8401 起只提供探针和指标，业务上只出站访问主存储 | [技术方案](technical-design.md) |
-| R2-10 | R1-17 只写到旧 epoch 被拒绝 | 补上复制前丢失窗口：已返回 201 但尚未复制的订单，切换后可能不在新主上。调用方用同一钥匙再 POST。监督者切换时网关最多暂停 2 秒 | [ADR 0001](adr/0001-single-leader.md) |
-| R2-11 | 画布写推荐最多等 80ms，没有和存储调用的先后 | 推荐的 80ms 与存储调用同时起算。存储返回后只等待剩余时间 | [技术方案](technical-design.md) |
-| R2-12 | 画布没有写调用方自己的超时 | 调用方 HTTP 超时建议 1.5 秒，略长于内部 800ms，并用同一幂等键重试 429、503、504 和连接失败 | [集成指南](integration.md) |
+| R2-1 | The canvas only said the client places an order, with no external boundary | The caller owns catalog, price, stock, and cart. OrangeOrder does not interpret sku and does not store an amount | [Overview](overview.md), [Integration guide](integration.md) |
+| R2-2 | The canvas had no caller identity | Every request carries `X-Caller-Id`. An idempotency key is scoped to one caller | [API](api.md) |
+| R2-3 | The canvas had no caller reference or fulfillment URL | Add optional `external_ref`. `fulfill_url` is optional and only `http://127.0.0.1` is allowed. If omitted, the worker marks the job done locally | [ADR 0005](adr/0005-sync-poll-integration.md) |
+| R2-4 | The canvas had no query method | Fulfillment progress is polled with GET. Version one has no webhook | [Integration guide](integration.md) |
+| R2-5 | R1-2 and the process table said orders are “2, at most 3,” and the scale target was vague | Order replicas are fixed at 2, for resilience only. Only workers are added and removed automatically, from 1 to 3 | [Technical design](technical-design.md) |
+| R2-6 | R1-19 said “return the first result” | The same key does not create a second order. Replay returns the current snapshot. Fulfillment status may have advanced. Item, quantity, and `external_ref` do not change | [Data model](data-model.md) |
+| R2-7 | R1-13 and R1-21 only said the backlog passed a cap | Add one worker only when pending jobs stay above 10 for 5 seconds. At 50 pending, new orders return 429. Extra workers are removed only after pending stays at 0 for 20 seconds. Cooldown is 15 seconds | [Technical design](technical-design.md) |
+| R2-8 | Observation listed four counters | Five metrics are required: errors, in-flight, pending jobs, replication lag, and whether the breaker is open | [Technical design](technical-design.md) |
+| R2-9 | Workers had no port on the canvas | Workers from 8401 up serve only probes and metrics. For the business they only call the leader outbound | [Technical design](technical-design.md) |
+| R2-10 | R1-17 stopped at “the old epoch is rejected” | Add the loss window before replication: an order that returned 201 but was not replicated may be absent on the new leader. The caller POSTs again with the same key. During a switch the gateway pauses for at most 2 seconds | [ADR 0001](adr/0001-single-leader.md) |
+| R2-11 | The canvas said recommendation waits at most 80ms, without ordering it against the store call | The 80ms for recommendation starts together with the store call. After the store returns, only the remaining time is waited | [Technical design](technical-design.md) |
+| R2-12 | The canvas did not write the caller’s own timeout | The caller’s HTTP timeout should be 1.5 seconds, a little longer than the internal 800ms, and the same idempotency key retries 429, 503, 504, and connection failure | [Integration guide](integration.md) |
 
-## 变更之后仍然有效的要求
+## Requirements that stay in force after the changes
 
-下面这些从原始表或 CHG-1 留下来，CHG-2 没有推翻：
+These remain from the original table or from CHG-1. CHG-2 did not overturn them:
 
-- 容错和伸缩分开设计。
-- 单一网关、本地令牌桶、无状态订单进程。
-- 幂等键、截止时间、有界积压、epoch 写入隔离。
-- 熔断和降级只用于推荐。下单失败返回错误。
-- 任务表承担削峰、可见性超时、退避和死信。
-- 单主 fsync 后确认，从存储可以落后。监督者是唯一见证人。
-- 存活探针和就绪探针分开。故障注入只在本机的 `runtime/faults.json`。
-- 第一版仍然不包含 CDN、Envoy、Kafka、Kubernetes、多主、CQRS、Raft、跨地域多活和托管混沌平台。
+- Design resilience and elasticity separately.
+- One gateway, a local token bucket, stateless order processes.
+- Idempotency key, deadline, bounded backlog, epoch write fencing.
+- Breaker and degradation apply only to recommendation. A failed order returns an error.
+- The job table provides burst absorption, visibility timeout, backoff, and dead letter.
+- Confirm after the single leader fsyncs. The follower may lag. The supervisor is the only witness.
+- Liveness and readiness are separate. Fault injection is only the local `runtime/faults.json`.
+- Version one still does not include CDN, Envoy, Kafka, Kubernetes, multi-leader, CQRS, Raft, multi-region active-active, or a hosted chaos platform.
 
-## 变更 CHG-3：五种语言实现同一份契约
+## Change CHG-3: five languages implement one contract
 
-日期：2026-10-21。触发原因：同一份下单设计要能对照着读不同语言，而不是只保留最初的 Python。
+Date: 2026-10-21. Trigger: the same order design should be readable across languages, not only in the original Python.
 
-这次变更不改端口、错误、日志、参数和 AC-1 到 AC-12。对外契约仍然不携带某种语言的类型。
+This change does not alter ports, errors, logs, parameters, or AC-1 through AC-12. The external contract still carries no type from a particular language.
 
-| 编号 | 相对 CHG-2 | 变更后的需求 | 落在哪 |
+| Id | Relative to CHG-2 | Requirement after the change | Where it landed |
 | --- | --- | --- | --- |
-| R3-1 | 实现约定只写 Python 标准库 | 五种实现并排：Python、Rust、Java、C++、Go。一次只跑一种，因为端口相同 | [ADR 0004](adr/0004-stdlib-sqlite.md)、各语言 README |
-| R3-2 | 技术方案把运行时写成 Python 标准库 | 语言差异留在 ADR 0004 和各语言 README。技术方案只保留与语言无关的参数和行为 | [技术方案](technical-design.md) |
+| R3-1 | The implementation agreement mentioned only the Python standard library | Five implementations side by side: Python, Rust, Java, C++, and Go. Run one at a time, because the ports are the same | [ADR 0004](adr/0004-stdlib-sqlite.md), each language README |
+| R3-2 | The technical design named the runtime as the Python standard library | Language differences stay in ADR 0004 and the language READMEs. The technical design keeps only language-neutral parameters and behavior | [Technical design](technical-design.md) |
 
-## 变更 CHG-4：项目更名为 OrangeOrder
+## Change CHG-4: the project is renamed OrangeOrder
 
-日期：2026-10-22。触发原因：仓库名 OrangeDistributedSystem 把一台机器上的下单系统说成了一套分布式平台。
+Date: 2026-10-22. Trigger: the repository name OrangeDistributedSystem described a one-machine order system as a distributed platform.
 
-这次变更只改对外名称。端口、错误、日志、参数、验收和五种语言的模块名都不动。Python 包、Java 包、Rust 包、Go 模块和可执行文件仍然叫 `orange`。
+This change renames the project as presented to readers. Ports, errors, logs, parameters, acceptance tests, and the module name in all five languages stay the same. The Python package, Java package, Rust package, Go module, and executable remain `orange`.
 
-| 编号 | 相对 CHG-3 | 变更后的需求 | 落在哪 |
+| Id | Relative to CHG-3 | Requirement after the change | Where it landed |
 | --- | --- | --- | --- |
-| R4-1 | 对外名称是 Orange，仓库名是 OrangeDistributedSystem | 项目名为 OrangeOrder。文档、接口标题和示意图使用这个名字 | 首页、设计文档、OpenAPI |
+| R4-1 | The public name was Orange, and the repository was OrangeDistributedSystem | The project name is OrangeOrder. Documents, the API title, and diagrams use that name | Homepage, design docs, OpenAPI |
 
-## 变更 CHG-5：加上 TypeScript 实现
+## Change CHG-5: add the TypeScript implementation
 
-日期：2026-10-23。触发原因：现有五种语言都能在一次调用里阻塞等待，缺一个事件循环运行时来对照截止时间和并行推荐。
+Date: 2026-10-23. Trigger: the five existing languages can all block inside one call. An event-loop runtime was missing for the deadline and the parallel recommendation.
 
-这次变更不改端口、错误、日志、参数和 AC-1 到 AC-12。TypeScript 进程由监督者直接拉起。存储事务仍是同步的 sqlite；推荐和故障文件轮询走 Node 的事件循环。
+This change does not alter ports, errors, logs, parameters, or AC-1 through AC-12. The supervisor starts the TypeScript processes directly. Store transactions stay synchronous sqlite. Recommendation and fault-file polling run on Node’s event loop.
 
-| 编号 | 相对 CHG-4 | 变更后的需求 | 落在哪 |
+| Id | Relative to CHG-4 | Requirement after the change | Where it landed |
 | --- | --- | --- | --- |
-| R5-1 | 实现约定停在 Python、Rust、Java、C++、Go | 加上 TypeScript（Node）。一次只跑一种，因为端口相同 | [ADR 0004](adr/0004-stdlib-sqlite.md)、`ts/README.md` |
+| R5-1 | The implementation agreement stopped at Python, Rust, Java, C++, and Go | Add TypeScript on Node. Run one language at a time, because the ports are the same | [ADR 0004](adr/0004-stdlib-sqlite.md), `ts/README.en.md` |
