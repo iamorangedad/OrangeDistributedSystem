@@ -7,7 +7,7 @@ import os
 import threading
 import time
 
-from orange.common import (
+from common import (
     FULFILL_TIMEOUT_SEC,
     decode_json,
     empty_response,
@@ -141,7 +141,7 @@ def main() -> None:
     parser.add_argument("--supervisor", required=True)
     parser.add_argument("--root", default=os.getcwd())
     args = parser.parse_args()
-    import orange.common as common
+    import common
 
     common.PROCESS_NAME = args.process_name
     common.ROOT = args.root

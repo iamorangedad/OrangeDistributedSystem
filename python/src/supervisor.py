@@ -11,7 +11,7 @@ import threading
 import time
 from typing import Any
 
-from orange.common import (
+from common import (
     HEARTBEAT_SEC,
     LEADER_LOST_SEC,
     PROMOTION_PAUSE_SEC,
@@ -69,21 +69,21 @@ class Supervisor:
         data = os.path.join(self.root, "runtime", "data")
         if name == "store-a":
             return [
-                python, "-m", "orange.store",
+                python, "-m", "store",
                 "--node-id", "store-a", "--port", "8301", "--role", "leader",
                 "--peer", STORE_B, "--data", os.path.join(data, "store-a.sqlite"),
                 "--supervisor", SUPERVISOR_URL, *common,
             ]
         if name == "store-b":
             return [
-                python, "-m", "orange.store",
+                python, "-m", "store",
                 "--node-id", "store-b", "--port", "8302", "--role", "follower",
                 "--peer", STORE_A, "--data", os.path.join(data, "store-b.sqlite"),
                 "--supervisor", SUPERVISOR_URL, *common,
             ]
         if name == "gateway":
             return [
-                python, "-m", "orange.gateway",
+                python, "-m", "gateway",
                 "--port", "8080", "--supervisor", SUPERVISOR_URL,
                 "--orders", "http://127.0.0.1:8101,http://127.0.0.1:8102",
                 "--process-name", "gateway", *common,
@@ -93,11 +93,11 @@ class Supervisor:
         if name == "order-2":
             return self._order("order-2", 8102) + common
         if name == "recommender":
-            return [python, "-m", "orange.recommender", "--port", "8200", "--process-name", "recommender", *common]
+            return [python, "-m", "recommender", "--port", "8200", "--process-name", "recommender", *common]
         if name.startswith("worker-"):
             index = int(name.split("-")[1])
             return [
-                python, "-m", "orange.worker",
+                python, "-m", "worker",
                 "--process-name", name, "--port", str(8400 + index),
                 "--supervisor", SUPERVISOR_URL, *common,
             ]
@@ -105,7 +105,7 @@ class Supervisor:
 
     def _order(self, name: str, port: int) -> list[str]:
         return [
-            sys.executable, "-m", "orange.order_service",
+            sys.executable, "-m", "order_service",
             "--process-name", name, "--port", str(port),
             "--supervisor", SUPERVISOR_URL, "--recommender", "http://127.0.0.1:8200",
         ]
@@ -325,7 +325,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", default=os.getcwd())
     args = parser.parse_args()
-    import orange.common as common
+    import common
 
     common.PROCESS_NAME = "supervisor"
     common.ROOT = args.root

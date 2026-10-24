@@ -18,6 +18,6 @@ find src test -name '*.java' > build/sources.txt
 "$JAVA_HOME/bin/javac" --release 21 -encoding UTF-8 -cp lib/sqlite-jdbc.jar -d build @build/sources.txt
 CP="build:lib/sqlite-jdbc.jar"
 if [ "${1:-}" = "test" ]; then
-    exec "$JAVA_HOME/bin/java" -cp "$CP" orange.Acceptance
+    exec "$JAVA_HOME/bin/java" -cp "$CP" Acceptance
 fi
-exec "$JAVA_HOME/bin/java" -cp "$CP" orange.Main "$@"
+exec "$JAVA_HOME/bin/java" -cp "$CP" Main "$@"

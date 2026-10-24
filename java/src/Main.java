@@ -1,5 +1,3 @@
-package orange;
-
 /** 一个入口，用子命令区分进程，方便和 Python、Rust 对照着读。 */
 public final class Main {
     private Main() {}

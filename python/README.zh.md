@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-这一份是最初的实现。Python 只用标准库和 sqlite3。代码放在 `python/src/orange/`，测试放在 `python/tests/`。包名是 `orange`。`python/run.sh` 会把 `python/src` 放进 `PYTHONPATH`。
+这一份是最初的实现。Python 只用标准库和 sqlite3。代码直接放在 `python/src/`，测试放在 `python/tests/`。`python/run.sh` 会把 `python/src` 放进 `PYTHONPATH`，再执行 `python -m supervisor`。
 
 ## 怎么跑
 

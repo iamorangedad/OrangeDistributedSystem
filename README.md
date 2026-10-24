@@ -50,9 +50,9 @@ The same design is implemented six times, so the repository can be read as a lan
 
 | | Code | Start | Tests |
 | --- | --- | --- | --- |
-| Python | `python/src/orange/` | `python/run.sh --root .` | `python/run.sh test` |
+| Python | `python/src/` | `python/run.sh --root .` | `python/run.sh test` |
 | Rust | `rust/src/` | `cargo run --manifest-path rust/Cargo.toml -- --root .` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` |
-| Java | `java/src/orange/` | `java/build.sh --root .` | `java/build.sh test` |
+| Java | `java/src/` | `java/build.sh --root .` | `java/build.sh test` |
 | C++ | `cpp/src/` | `cpp/build.sh --root .` | `cpp/build.sh test` |
 | Go | `go/` | `go/run.sh --root .` | `go/run.sh test` |
 | TypeScript | `ts/src/` | `ts/run.sh --root .` | `ts/run.sh test` |
@@ -61,7 +61,7 @@ All six stacks listen on 8080, 8090, 8101, and the other fixed ports. Run one la
 
 The acceptance test starts the supervisor and every child. It takes about a minute or two. The ports are fixed, so two stacks cannot listen together. Rust tests pass `--test-threads=1` for that reason.
 
-Python starts each process with `python -m orange.xxx`. The other five are one program: with no subcommand it is the supervisor, and it starts `store`, `gateway`, `order`, `recommender`, and `worker` as that same program.
+Python starts each process with `python -m`, for example `python -m supervisor`. The other five are one program: with no subcommand it is the supervisor, and it starts `store`, `gateway`, `order`, `recommender`, and `worker` as that same program.
 
 Each language directory has an English `README.md` and a Chinese `README.zh.md`.
 
@@ -69,14 +69,14 @@ Each language directory has an English `README.md` and a Chinese `README.zh.md`.
 
 | Role | Python | Rust | Java | C++ | Go | TypeScript |
 | --- | --- | --- | --- | --- | --- | --- |
-| Entry | `python/src/orange/__main__.py` | `rust/src/main.rs` | `java/src/orange/Main.java` | `cpp/src/main.cpp` | `go/main.go` | `ts/src/main.ts` |
-| Shared library | `python/src/orange/common.py` | `rust/src/common.rs`, `http_util.rs` | `Common.java`, `HttpUtil.java`, `Json.java` | `cpp/src/common.cpp`, `http.cpp`, `json.cpp` | `go/common.go`, `http.go` | `ts/src/common.ts`, `http.ts` |
-| Gateway | `python/src/orange/gateway.py` | `rust/src/gateway.rs` | `java/src/orange/Gateway.java` | `cpp/src/gateway.cpp` | `go/gateway.go` | `ts/src/gateway.ts` |
-| Order | `python/src/orange/order_service.py` | `rust/src/order.rs` | `java/src/orange/OrderService.java` | `cpp/src/order.cpp` | `go/order.go` | `ts/src/order.ts` |
-| Recommender | `python/src/orange/recommender.py` | `rust/src/recommender.rs` | `java/src/orange/Recommender.java` | `cpp/src/recommender.cpp` | `go/recommender.go` | `ts/src/recommender.ts` |
-| Store | `python/src/orange/store.py` | `rust/src/store.rs` | `java/src/orange/Store.java` | `cpp/src/store.cpp` | `go/store.go` | `ts/src/store.ts` |
-| Worker | `python/src/orange/worker.py` | `rust/src/worker.rs` | `java/src/orange/Worker.java` | `cpp/src/worker.cpp` | `go/worker.go` | `ts/src/worker.ts` |
-| Supervisor | `python/src/orange/supervisor.py` | `rust/src/supervisor.rs` | `java/src/orange/Supervisor.java` | `cpp/src/supervisor.cpp` | `go/supervisor.go` | `ts/src/supervisor.ts` |
-| Acceptance | `python/tests/` | `rust/tests/acceptance.rs` | `java/test/orange/Acceptance.java` | `cpp/tests/acceptance.cpp` | `go/acceptance/` | `ts/src/acceptance.test.ts` |
+| Entry | `python/src/supervisor.py` | `rust/src/main.rs` | `java/src/Main.java` | `cpp/src/main.cpp` | `go/main.go` | `ts/src/main.ts` |
+| Shared library | `python/src/common.py` | `rust/src/common.rs`, `http_util.rs` | `Common.java`, `HttpUtil.java`, `Json.java` | `cpp/src/common.cpp`, `http.cpp`, `json.cpp` | `go/common.go`, `http.go` | `ts/src/common.ts`, `http.ts` |
+| Gateway | `python/src/gateway.py` | `rust/src/gateway.rs` | `java/src/Gateway.java` | `cpp/src/gateway.cpp` | `go/gateway.go` | `ts/src/gateway.ts` |
+| Order | `python/src/order_service.py` | `rust/src/order.rs` | `java/src/OrderService.java` | `cpp/src/order.cpp` | `go/order.go` | `ts/src/order.ts` |
+| Recommender | `python/src/recommender.py` | `rust/src/recommender.rs` | `java/src/Recommender.java` | `cpp/src/recommender.cpp` | `go/recommender.go` | `ts/src/recommender.ts` |
+| Store | `python/src/store.py` | `rust/src/store.rs` | `java/src/Store.java` | `cpp/src/store.cpp` | `go/store.go` | `ts/src/store.ts` |
+| Worker | `python/src/worker.py` | `rust/src/worker.rs` | `java/src/Worker.java` | `cpp/src/worker.cpp` | `go/worker.go` | `ts/src/worker.ts` |
+| Supervisor | `python/src/supervisor.py` | `rust/src/supervisor.rs` | `java/src/Supervisor.java` | `cpp/src/supervisor.cpp` | `go/supervisor.go` | `ts/src/supervisor.ts` |
+| Acceptance | `python/tests/` | `rust/tests/acceptance.rs` | `java/test/Acceptance.java` | `cpp/tests/acceptance.cpp` | `go/acceptance/` | `ts/src/acceptance.test.ts` |
 
-Java classes live in `java/src/orange/`. Behavior follows the parameter table in the technical design.
+Java classes live in `java/src/`. Behavior follows the parameter table in the technical design.

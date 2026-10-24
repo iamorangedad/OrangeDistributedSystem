@@ -1,5 +1,3 @@
-package orange;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -121,7 +119,7 @@ final class Supervisor {
         args.add(javaBin);
         args.add("-cp");
         args.add(classpath);
-        args.add("orange.Main");
+        args.add("Main");
         switch (name) {
             case "store-a" -> args.addAll(List.of("store", "--node-id", "store-a", "--port", "8301", "--role", "leader", "--peer", STORE_B, "--data", root + "/runtime/data/store-a.sqlite", "--supervisor", SUPERVISOR_URL));
             case "store-b" -> args.addAll(List.of("store", "--node-id", "store-b", "--port", "8302", "--role", "follower", "--peer", STORE_A, "--data", root + "/runtime/data/store-b.sqlite", "--supervisor", SUPERVISOR_URL));

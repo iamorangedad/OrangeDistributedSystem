@@ -2,7 +2,7 @@
 
 [中文](README.zh.md)
 
-This is the original implementation. Python uses the standard library and sqlite3. Code is in `python/src/orange/`. Tests are in `python/tests/`. The package name is `orange`. `python/run.sh` puts `python/src` on `PYTHONPATH`.
+This is the original implementation. Python uses the standard library and sqlite3. Code is in `python/src/`. Tests are in `python/tests/`. `python/run.sh` puts `python/src` on `PYTHONPATH` and starts `python -m supervisor`.
 
 ## Run
 

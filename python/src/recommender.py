@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import os
 
-from orange.common import (
+from common import (
     decode_json,
     empty_response,
     error_body,
@@ -56,7 +56,7 @@ def main() -> None:
     parser.add_argument("--root", default=os.getcwd())
     parser.add_argument("--process-name", default="recommender")
     args = parser.parse_args()
-    import orange.common as common
+    import common
 
     common.PROCESS_NAME = args.process_name
     common.ROOT = args.root

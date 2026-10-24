@@ -7,7 +7,7 @@ import os
 import threading
 import time
 
-from orange.common import (
+from common import (
     GATEWAY_INFLIGHT_LIMIT,
     JOBS_PENDING_LIMIT,
     ORDER_DEADLINE_MS,
@@ -219,7 +219,7 @@ def main() -> None:
     parser.add_argument("--root", default=os.getcwd())
     parser.add_argument("--process-name", default="gateway")
     args = parser.parse_args()
-    import orange.common as common
+    import common
 
     common.PROCESS_NAME = args.process_name
     common.ROOT = args.root

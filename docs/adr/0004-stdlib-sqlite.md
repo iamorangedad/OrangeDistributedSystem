@@ -21,9 +21,9 @@ The supervisor starts processes directly. There is no container manifest. Only o
 
 | Language | How a process runs | HTTP and JSON | sqlite |
 | --- | --- | --- | --- |
-| Python | `python -m orange.xxx`, standard library | Standard-library HTTP and `json` | Standard-library `sqlite3` |
+| Python | `python -m supervisor` and the other modules in `python/src`, standard library | Standard-library HTTP and `json` | Standard-library `sqlite3` |
 | Rust | Subcommands of one binary, threads, no async runtime | Blocking HTTP parsed in process, `serde_json` | `rusqlite`, sqlite bundled in the binary |
-| Java | Subcommands of the same `orange.Main` | JDK `HttpServer`, hand-written `Json` | `sqlite-jdbc`, downloaded by the build, not committed |
+| Java | Subcommands of the same `Main` | JDK `HttpServer`, hand-written `Json` | `sqlite-jdbc`, downloaded by the build, not committed |
 | C++ | Subcommands of one binary, one thread per connection | POSIX sockets, hand-written JSON | System `libsqlite3.so.0`; the header is downloaded by the build |
 | Go | Subcommands of one binary, goroutines and a lock | Standard-library `net/http` | `modernc.org/sqlite`, pure Go, no cgo |
 | TypeScript | Subcommands of one Node process, the event loop | Standard-library `node:http` and `JSON` | `better-sqlite3`, compiled at install, not committed |
