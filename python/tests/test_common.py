@@ -3,7 +3,7 @@
 import threading
 import unittest
 
-from orange.common import (
+from common import (
     CircuitBreaker,
     TokenBucket,
     canonical_body,

@@ -46,9 +46,9 @@ OrangeOrder 是一个跑在单机上的多进程下单系统，用来学习分�
 
 | | 代码 | 启动 | 测试 |
 | --- | --- | --- | --- |
-| Python | `python/src/orange/` | `python/run.sh --root .` | `python/run.sh test` |
+| Python | `python/src/` | `python/run.sh --root .` | `python/run.sh test` |
 | Rust | `rust/src/` | `cargo run --manifest-path rust/Cargo.toml -- --root .` | `cargo test --manifest-path rust/Cargo.toml -- --test-threads=1` |
-| Java | `java/src/orange/` | `java/build.sh --root .` | `java/build.sh test` |
+| Java | `java/src/` | `java/build.sh --root .` | `java/build.sh test` |
 | C++ | `cpp/src/` | `cpp/build.sh --root .` | `cpp/build.sh test` |
 | Go | `go/` | `go/run.sh --root .` | `go/run.sh test` |
 | TypeScript | `ts/src/` | `ts/run.sh --root .` | `ts/run.sh test` |
@@ -57,7 +57,7 @@ OrangeOrder 是一个跑在单机上的多进程下单系统，用来学习分�
 
 验收会拉起监督者和全部子进程，大约一两分钟。端口固定，不能两套一起听。Rust 的测试因此加上 `--test-threads=1`。
 
-Python 用 `python -m orange.xxx` 拉起每个进程。其余五种是一个程序：不带子命令时它就是监督者，再以 `store`、`gateway`、`order`、`recommender`、`worker` 拉起自己。
+Python 用 `python -m` 拉起每个进程，例如 `python -m supervisor`。其余五种是一个程序：不带子命令时它就是监督者，再以 `store`、`gateway`、`order`、`recommender`、`worker` 拉起自己。
 
 每个语言目录里，`README.md` 是英文说明，`README.zh.md` 是中文说明。
 
@@ -65,14 +65,14 @@ Python 用 `python -m orange.xxx` 拉起每个进程。其余五种是一个程�
 
 | 职责 | Python | Rust | Java | C++ | Go | TypeScript |
 | --- | --- | --- | --- | --- | --- | --- |
-| 入口 | `python/src/orange/__main__.py` | `rust/src/main.rs` | `java/src/orange/Main.java` | `cpp/src/main.cpp` | `go/main.go` | `ts/src/main.ts` |
-| 公共库 | `python/src/orange/common.py` | `rust/src/common.rs`、`http_util.rs` | `Common.java`、`HttpUtil.java`、`Json.java` | `cpp/src/common.cpp`、`http.cpp`、`json.cpp` | `go/common.go`、`http.go` | `ts/src/common.ts`、`http.ts` |
-| 网关 | `python/src/orange/gateway.py` | `rust/src/gateway.rs` | `java/src/orange/Gateway.java` | `cpp/src/gateway.cpp` | `go/gateway.go` | `ts/src/gateway.ts` |
-| 订单 | `python/src/orange/order_service.py` | `rust/src/order.rs` | `java/src/orange/OrderService.java` | `cpp/src/order.cpp` | `go/order.go` | `ts/src/order.ts` |
-| 推荐 | `python/src/orange/recommender.py` | `rust/src/recommender.rs` | `java/src/orange/Recommender.java` | `cpp/src/recommender.cpp` | `go/recommender.go` | `ts/src/recommender.ts` |
-| 存储 | `python/src/orange/store.py` | `rust/src/store.rs` | `java/src/orange/Store.java` | `cpp/src/store.cpp` | `go/store.go` | `ts/src/store.ts` |
-| 工人 | `python/src/orange/worker.py` | `rust/src/worker.rs` | `java/src/orange/Worker.java` | `cpp/src/worker.cpp` | `go/worker.go` | `ts/src/worker.ts` |
-| 监督者 | `python/src/orange/supervisor.py` | `rust/src/supervisor.rs` | `java/src/orange/Supervisor.java` | `cpp/src/supervisor.cpp` | `go/supervisor.go` | `ts/src/supervisor.ts` |
-| 验收 | `python/tests/` | `rust/tests/acceptance.rs` | `java/test/orange/Acceptance.java` | `cpp/tests/acceptance.cpp` | `go/acceptance/` | `ts/src/acceptance.test.ts` |
+| 入口 | `python/src/supervisor.py` | `rust/src/main.rs` | `java/src/Main.java` | `cpp/src/main.cpp` | `go/main.go` | `ts/src/main.ts` |
+| 公共库 | `python/src/common.py` | `rust/src/common.rs`、`http_util.rs` | `Common.java`、`HttpUtil.java`、`Json.java` | `cpp/src/common.cpp`、`http.cpp`、`json.cpp` | `go/common.go`、`http.go` | `ts/src/common.ts`、`http.ts` |
+| 网关 | `python/src/gateway.py` | `rust/src/gateway.rs` | `java/src/Gateway.java` | `cpp/src/gateway.cpp` | `go/gateway.go` | `ts/src/gateway.ts` |
+| 订单 | `python/src/order_service.py` | `rust/src/order.rs` | `java/src/OrderService.java` | `cpp/src/order.cpp` | `go/order.go` | `ts/src/order.ts` |
+| 推荐 | `python/src/recommender.py` | `rust/src/recommender.rs` | `java/src/Recommender.java` | `cpp/src/recommender.cpp` | `go/recommender.go` | `ts/src/recommender.ts` |
+| 存储 | `python/src/store.py` | `rust/src/store.rs` | `java/src/Store.java` | `cpp/src/store.cpp` | `go/store.go` | `ts/src/store.ts` |
+| 工人 | `python/src/worker.py` | `rust/src/worker.rs` | `java/src/Worker.java` | `cpp/src/worker.cpp` | `go/worker.go` | `ts/src/worker.ts` |
+| 监督者 | `python/src/supervisor.py` | `rust/src/supervisor.rs` | `java/src/Supervisor.java` | `cpp/src/supervisor.cpp` | `go/supervisor.go` | `ts/src/supervisor.ts` |
+| 验收 | `python/tests/` | `rust/tests/acceptance.rs` | `java/test/Acceptance.java` | `cpp/tests/acceptance.cpp` | `go/acceptance/` | `ts/src/acceptance.test.ts` |
 
-Java 类都在 `java/src/orange/`。行为以技术方案的参数表为准。
+Java 类都在 `java/src/`。行为以技术方案的参数表为准。

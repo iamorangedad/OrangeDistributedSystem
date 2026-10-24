@@ -1,5 +1,3 @@
-package orange;
-
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
@@ -423,7 +421,7 @@ public final class Acceptance {
             Path root = Files.createTempDirectory("orange-java-");
             Files.createDirectories(root.resolve("runtime"));
             String javaBin = Path.of(System.getProperty("java.home"), "bin", "java").toString();
-            ProcessBuilder builder = new ProcessBuilder(javaBin, "-cp", System.getProperty("java.class.path"), "orange.Main", "--root", root.toString());
+            ProcessBuilder builder = new ProcessBuilder(javaBin, "-cp", System.getProperty("java.class.path"), "Main", "--root", root.toString());
             builder.redirectErrorStream(true);
             builder.redirectOutput(root.resolve("runtime/supervisor.out").toFile());
             Process process = builder.start();

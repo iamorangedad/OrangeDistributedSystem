@@ -9,7 +9,7 @@ import time
 from typing import Any
 from urllib.parse import quote
 
-from orange.common import (
+from common import (
     RECOMMEND_BUDGET_MS,
     STORE_CALL_CAP_MS,
     CircuitBreaker,
@@ -300,7 +300,7 @@ def main() -> None:
     parser.add_argument("--recommender", required=True)
     parser.add_argument("--root", default=os.getcwd())
     args = parser.parse_args()
-    import orange.common as common
+    import common
 
     common.PROCESS_NAME = args.process_name
     common.ROOT = args.root

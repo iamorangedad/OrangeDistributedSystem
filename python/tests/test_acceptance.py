@@ -13,7 +13,7 @@ import time
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from orange.common import decode_json, http_request
+from common import decode_json, http_request
 
 
 GATEWAY = "http://127.0.0.1:8080"
@@ -103,7 +103,7 @@ class Cluster:
         current = env.get("PYTHONPATH")
         env["PYTHONPATH"] = src if not current else src + os.pathsep + current
         self.proc = subprocess.Popen(
-            [sys.executable, "-m", "orange.supervisor", "--root", self.root],
+            [sys.executable, "-m", "supervisor", "--root", self.root],
             env=env,
             start_new_session=True,
         )

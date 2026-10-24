@@ -1,5 +1,3 @@
-package orange;
-
 import java.util.Map;
 
 /** 对照 orange/recommender.py。可失败的推荐旁路，不访问存储。 */

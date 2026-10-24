@@ -21,9 +21,9 @@
 
 | 语言 | 进程怎么跑 | HTTP 与 JSON | sqlite |
 | --- | --- | --- | --- |
-| Python | `python -m orange.xxx`，标准库 | 标准库 HTTP 与 `json` | 标准库 `sqlite3` |
+| Python | `python -m supervisor` 以及 `python/src` 里的其他模块，标准库 | 标准库 HTTP 与 `json` | 标准库 `sqlite3` |
 | Rust | 一个二进制的子命令，线程，不用异步运行时 | 自己解析的阻塞 HTTP，`serde_json` | `rusqlite`，随二进制带上 sqlite |
-| Java | 同一个 `orange.Main` 的子命令 | JDK 的 `HttpServer`，手写 `Json` | `sqlite-jdbc`，构建时下载，不进版本库 |
+| Java | 同一个 `Main` 的子命令 | JDK 的 `HttpServer`，手写 `Json` | `sqlite-jdbc`，构建时下载，不进版本库 |
 | C++ | 一个二进制的子命令，每个连接一个线程 | POSIX 套接字，手写 JSON | 系统的 `libsqlite3.so.0`，头文件由构建脚本下载 |
 | Go | 一个二进制的子命令，goroutine 加锁 | 标准库 `net/http` | `modernc.org/sqlite`，纯 Go，不使用 cgo |
 | TypeScript | 一个 Node 进程的子命令，事件循环 | 标准库 `node:http`，`JSON` | `better-sqlite3`，安装时编译，不进版本库 |

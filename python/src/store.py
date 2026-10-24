@@ -10,7 +10,7 @@ import threading
 import time
 from typing import Any
 
-from orange.common import (
+from common import (
     HEARTBEAT_SEC,
     JOB_MAX_ATTEMPTS,
     PROCESS_NAME,
@@ -867,7 +867,7 @@ def main() -> None:
     os.environ["ORANGE_ROOT"] = args.root
     os.environ["ORANGE_PROCESS"] = args.node_id
     # 模块导入时已读过环境变量，这里把进程名和根目录写回 common。
-    import orange.common as common
+    import common
 
     common.PROCESS_NAME = args.node_id
     common.ROOT = args.root
